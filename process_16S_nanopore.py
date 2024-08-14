@@ -110,7 +110,7 @@ def run_chopper(samples, threads, results_folder_name):
         reads_in = f'{results_folder_name}/raw_data/{sample}_porechopped.fastq.gz'
         reads_out = f'{results_folder_name}/raw_data/{sample}_chopped.fastq.gz'
         args = ['gunzip', '-c', reads_in, '|',
-                'chopper', '-q', str(11), '--maxlength', str(1800),
+                'chopper', '-q', str(9), '--maxlength', str(1800),
                            '--minlength', str(1300), '--threads', str(threads),
                 '|', 'gzip', '>', reads_out]
         subprocess.call(' '.join(args), shell = True)
