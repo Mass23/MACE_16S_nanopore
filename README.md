@@ -2,7 +2,7 @@
 
 -> Author: Massimo Bourquin, 2024
 
-# 1. Installation
+# 1. Installation & Usage
 
   a. Clone the Github repo `git clone https://github.com/Mass23/MACE_16S_nanopore`, place the data folder (reads) inside the repository
   
