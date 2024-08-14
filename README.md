@@ -1,6 +1,6 @@
 ## Python wrapper that uses several tools (porechope, qiime2, etc.) to analyse 16S nanopore data
 
-1. Installation
+# 1. Installation
 
   a. Clone the Github repo `git clone https://github.com/Mass23/MACE_16S_nanopore`
   
@@ -8,7 +8,7 @@
   
   c. Run example (in the example file) `python3 process_16S_nanopore.py -f alpine_soil/ -n alpine_soil -m metadata.tsv -t 24`
 
-2. Description
+# 2. Description
 
   a. Porechop: removes adapters
   
@@ -16,5 +16,5 @@
   
   c. Qiime2: dereplicates sequences, creates abundance table, and taxonokmy based on greengenes2
 
-3. Results/ folder
+# 3. Results/ folder
 to do...
