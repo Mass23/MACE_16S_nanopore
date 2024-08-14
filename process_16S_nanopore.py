@@ -97,7 +97,7 @@ def run_porechop(samples, threads, results_folder_name):
         reads_out = f'{results_folder_name}/raw_data/{sample}_porechopped.fastq.gz'
         args = ['porechop', '--threads', str(threads), '-i', reads_in, '-o',
                 reads_out]
-        #subprocess.call(' '.join(args), shell = True)
+        subprocess.call(' '.join(args), shell = True)
 
         with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args) + '\n\n')
@@ -113,7 +113,7 @@ def run_chopper(samples, threads, results_folder_name):
                 'chopper', '-q', str(11), '--maxlength', str(1800),
                            '--minlength', str(1300), '--threads', str(threads),
                 '|', 'gzip', '>', reads_out]
-        #subprocess.call(' '.join(args), shell = True)
+        subprocess.call(' '.join(args), shell = True)
 
         with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args) + '\n\n')
@@ -137,7 +137,7 @@ def import_qiime2(results_folder_name):
             '--input-path', f'{results_folder_name}/qiime2/qiime2_manifest.csv', 
             '--output-path' , f'{results_folder_name}/qiime2/preprocessed_reads.qza',
             '--input-format', 'SingleEndFastqManifestPhred33V2']
-    #subprocess.call(' '.join(args), shell = True)
+    subprocess.call(' '.join(args), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args) + '\n\n')
 
@@ -146,14 +146,14 @@ def dereplicate_qiime2(results_folder_name):
             '--i-sequences', f'{results_folder_name}/qiime2/preprocessed_reads.qza',
             '--o-dereplicated-table', 'table-dereplicated.qza', 
             '--o-dereplicated-sequences', 'rep-seqs-dereplicated.qza']
-    #subprocess.call(' '.join(args), shell = True)
+    subprocess.call(' '.join(args), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args) + '\n\n')
 
 def taxonomy_qiime2(results_folder_name):
     args_1 = ['wget', '-P', f'{results_folder_name}/qiime2/',
     'http://ftp.microbio.me/greengenes_release/2022.10/2022.10.backbone.full-length.fna.qza']
-    #subprocess.call(' '.join(args_1), shell = True)
+    subprocess.call(' '.join(args_1), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_1) + '\n\n')
 
@@ -163,13 +163,13 @@ def taxonomy_qiime2(results_folder_name):
               '--i-backbone', f'{results_folder_name}/qiime2/2022.10.backbone.full-length.fna.qza',
               '--o-mapped-table', f'{results_folder_name}/qiime2/taxonomy-mapped-table.qza', 
               '--o-representatives', f'{results_folder_name}/qiime2/rep-seqs-taxonomy.qza']
-    #subprocess.call(' '.join(args_2), shell = True)
+    subprocess.call(' '.join(args_2), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_2) + '\n\n')
 
     args_3 = ['wget', '-P', f'{results_folder_name}/qiime2/',
     'http://ftp.microbio.me/greengenes_release/2022.10/2022.10.taxonomy.asv.nwk.qza']
-    #subprocess.call(' '.join(args_3), shell = True)
+    subprocess.call(' '.join(args_3), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_3) + '\n\n')
 
@@ -177,7 +177,7 @@ def taxonomy_qiime2(results_folder_name):
               '--i-reference-taxonomy', f'{results_folder_name}/qiime2/2022.10.taxonomy.asv.nwk.qza'
               '--i-table', f'{results_folder_name}/qiime2/taxonomy-mapped-table.qza', 
               '--o-classification', f'{results_folder_name}/qiime2/taxonomy-classification.qza']
-    #subprocess.call(' '.join(args_4), shell = True)
+    subprocess.call(' '.join(args_4), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_4) + '\n\n')
 
