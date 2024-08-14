@@ -1,4 +1,5 @@
 -> Python wrapper that uses several tools (porechope, qiime2, etc.) to analyse 16S nanopore data
+
 -> Author: Massimo Bourquin, 2024
 
 # 1. Installation
