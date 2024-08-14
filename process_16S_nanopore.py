@@ -127,14 +127,14 @@ def create_manifest(samples, results_folder_name):
     manifest = pd.DataFrame(columns=['sample-id', 'absolute-filepath'])
     for sample in samples:
         manifest.loc[len(manifest.index)] = [sample, f'{results_folder_name}/raw_data/{sample}_chopped.fastq.gz'] 
-    manifest.to_csv(f'{results_folder_name}/qiime2/qiime2_manifest.csv', index=False) 
+    manifest.to_csv(f'{results_folder_name}/qiime2/qiime2_manifest.tsv', sep='\t', index=False) 
 
     with open(f'{results_folder_name}/log.txt', 'a') as log:
         log.write('Qiime2 manifest created...' + '\n\n')
 
 def import_qiime2(results_folder_name):
     args = ['qiime', 'tools', 'import', '--type', "'SampleData[SequencesWithQuality]'",
-            '--input-path', f'{results_folder_name}/qiime2/qiime2_manifest.csv', 
+            '--input-path', f'{results_folder_name}/qiime2/qiime2_manifest.tsv', 
             '--output-path' , f'{results_folder_name}/qiime2/preprocessed_reads.qza',
             '--input-format', 'SingleEndFastqManifestPhred33V2']
     subprocess.call(' '.join(args), shell = True)
