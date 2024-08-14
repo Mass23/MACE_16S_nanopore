@@ -15,7 +15,7 @@ def create_result_folder(results_folder_name):
         os.makedirs(results_folder_name)
     
     with open(f'{results_folder_name}/log.txt', 'w') as log:
-        log.write(f"Log file for the run {results_folder_name}, time and date: {datetime.datetime.now().strftime("%I:%M%p on %B %d, %Y")} + '\n\n'")
+        log.write(f"Log file for the run {results_folder_name}, time and date: {datetime.datetime.now().strftime('%I:%M%p on %B %d, %Y')}" + '\n\n')
 
 def print_env_summary(results_folder_name):
     subprocess.call(f'conda list > {results_folder_name}/list_conda.txt', shell = True)
