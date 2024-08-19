@@ -226,14 +226,14 @@ def main():
                         help="Path to the metadata tsv file", required=True)
     parser.add_argument("-t", "--threads", type=str,
                         help="Number of threads to use for multiprocessing-compatible tasks", required=True)
-    parser.add_argument("--skippreprocessing",
+    parser.add_argument("--skippreprocessing", action='store_true',
                         help="To add if you want to skip preprocessing")
 
 
     # Parse arguments
     args = parser.parse_args()
 
-    if args.skippreprocessing is None:
+    if args.skippreprocessing is True:
         # Create results folder, print the environment summary, load the metadata
         # and list the samples to process
         out_folder = f'{args.name}_results'
