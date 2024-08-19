@@ -226,7 +226,7 @@ def main():
                         help="Path to the metadata tsv file", required=True)
     parser.add_argument("-t", "--threads", type=str,
                         help="Number of threads to use for multiprocessing-compatible tasks", required=True)
-    parser.add_argument("-sp", "--skippreprocessing", required=False,
+    parser.add_argument("--skippreprocessing",
                         help="To add if you want to skip preprocessing")
 
 
