@@ -200,29 +200,35 @@ def main():
     parser.add_argument("-f", "--folder", type=str,
                         help="Path to the folder as a string", required=True)
     parser.add_argument("-n", "--name", type=str,
-                        help="Path to the folder as a string", required=True)
+                        help="Name of the results folder (_results will be added at the end)", required=True)
     parser.add_argument("-m", "--metadata_file", type=str,
                         help="Path to the metadata tsv file", required=True)
     parser.add_argument("-t", "--threads", type=str,
-                        help="Path to the metadata tsv file", required=True)
+                        help="Number of threads to use for multiprocessing-compatible tasks", required=True)
+    parser.add_argument("-sp", "--skippreprocessing", required=False,
+                        help="To add if you want to skip preprocessing")
+
 
     # Parse arguments
     args = parser.parse_args()
 
+    if args.skippreprocessing:
+        continue
+    else:
     # Create results folder, print the environment summary, load the metadata
     # and list the samples to process
-    out_folder = f'{args.name}_results'
-    create_result_folder(out_folder)
-    print_env_summary(out_folder)
-    metadata = load_metadata(args.metadata_file)
-    samples = list_subfolders(args.folder)
-    metadata, samples_to_process = check_metadata_samples(metadata, samples, out_folder)
+        out_folder = f'{args.name}_results'
+        create_result_folder(out_folder)
+        print_env_summary(out_folder)
+        metadata = load_metadata(args.metadata_file)
+        samples = list_subfolders(args.folder)
+        metadata, samples_to_process = check_metadata_samples(metadata, samples, out_folder)
 
-    # Concatenate files belonging to the same sample in the new directory,
-    # run porechop and chopper
-    #samples_names = concatenate_files(args.folder, metadata, samples_to_process, out_folder)
-    #run_porechop(samples_names, args.threads, out_folder)
-    #run_chopper(samples_names, args.threads, out_folder)
+        # Concatenate files belonging to the same sample in the new directory,
+        # run porechop and chopper
+        samples_names = concatenate_files(args.folder, metadata, samples_to_process, out_folder)
+        run_porechop(samples_names, args.threads, out_folder)
+        run_chopper(samples_names, args.threads, out_folder)
 
     # Create the Qiime manifest, run qiime analysis
     create_manifest(out_folder)
