@@ -232,11 +232,11 @@ def main():
 
     # Parse arguments
     args = parser.parse_args()
-
-    if args.skippreprocessing is True:
+    out_folder = f'{args.name}_results'
+    
+    if args.skippreprocessing is False:
         # Create results folder, print the environment summary, load the metadata
         # and list the samples to process
-        out_folder = f'{args.name}_results'
         create_result_folder(out_folder)
         print_env_summary(out_folder)
         metadata = load_metadata(args.metadata_file)
