@@ -3,6 +3,7 @@ import argparse
 import subprocess
 import pandas as pd # type: ignore
 import datetime
+import glob
 
 ################################################################################
 #################           FUNCTIONS           ################################
@@ -122,11 +123,16 @@ def run_chopper(samples, threads, results_folder_name):
 
 # Qiime 2 part
 
-def create_manifest(samples, results_folder_name):
+def create_manifest(results_folder_name):
     os.makedirs(f'{results_folder_name}/qiime2')
+    full_path = os.getcwd()
     manifest = pd.DataFrame(columns=['sample-id', 'absolute-filepath'])
+    
+    sample_files = glob.glob(f'{results_folder_name}/raw_data/*_chopped.fastq.gz')
+    samples = [sample.split('/')[2].replace('_chopped.fastq.gz','') for sample in sample_files]
+    print(samples)
     for sample in samples:
-        manifest.loc[len(manifest.index)] = [sample, f'{results_folder_name}/raw_data/{sample}_chopped.fastq.gz'] 
+        manifest.loc[len(manifest.index)] = [sample, f'{full_path}/{results_folder_name}/raw_data/{sample}_chopped.fastq.gz'] 
     manifest.to_csv(f'{results_folder_name}/qiime2/qiime2_manifest.tsv', sep='\t', index=False) 
 
     with open(f'{results_folder_name}/log.txt', 'a') as log:
@@ -144,8 +150,8 @@ def import_qiime2(results_folder_name):
 def dereplicate_qiime2(results_folder_name):
     args = ['qiime', 'vsearch', 'dereplicate-sequences',
             '--i-sequences', f'{results_folder_name}/qiime2/preprocessed_reads.qza',
-            '--o-dereplicated-table', 'table-dereplicated.qza', 
-            '--o-dereplicated-sequences', 'rep-seqs-dereplicated.qza']
+            '--o-dereplicated-table', f'{results_folder_name}/qiime2/table-dereplicated.qza', 
+            '--o-dereplicated-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza']
     subprocess.call(' '.join(args), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args) + '\n\n')
@@ -214,12 +220,12 @@ def main():
 
     # Concatenate files belonging to the same sample in the new directory,
     # run porechop and chopper
-    samples_names = concatenate_files(args.folder, metadata, samples_to_process, out_folder)
-    run_porechop(samples_names, args.threads, out_folder)
-    run_chopper(samples_names, args.threads, out_folder)
+    #samples_names = concatenate_files(args.folder, metadata, samples_to_process, out_folder)
+    #run_porechop(samples_names, args.threads, out_folder)
+    #run_chopper(samples_names, args.threads, out_folder)
 
     # Create the Qiime manifest, run qiime analysis
-    create_manifest(samples_names, out_folder)
+    create_manifest(out_folder)
     import_qiime2(out_folder)
     dereplicate_qiime2(out_folder)
     taxonomy_qiime2(out_folder)
