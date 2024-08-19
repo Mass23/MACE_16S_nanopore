@@ -180,7 +180,7 @@ def taxonomy_qiime2(results_folder_name):
             log.write(' '.join(args_3) + '\n\n')
 
     args_4 = ['qiime', 'greengenes2', 'taxonomy-from-table',
-              '--i-reference-taxonomy', f'{results_folder_name}/qiime2/2022.10.taxonomy.asv.nwk.qza'
+              '--i-reference-taxonomy', f'{results_folder_name}/qiime2/2022.10.taxonomy.asv.nwk.qza',
               '--i-table', f'{results_folder_name}/qiime2/taxonomy-mapped-table.qza', 
               '--o-classification', f'{results_folder_name}/qiime2/taxonomy-classification.qza']
     subprocess.call(' '.join(args_4), shell = True)
@@ -191,9 +191,9 @@ def export_qiime2(results_folder_name):
     args_1 = ['qiime', 'tools', 'export', 
               '--input-path', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza', 
               '--output-path', f'{results_folder_name}/exported_sequences']
-    subprocess.call(' '.join(args_2), shell = True)
+    subprocess.call(' '.join(args_1), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_2) + '\n\n')
+            log.write(' '.join(args_1) + '\n\n')
 
     args_2 = ['qiime', 'tools', 'export', 
               '--input-path', f'{results_folder_name}/qiime2/table-dereplicated.qza', 
