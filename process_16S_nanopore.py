@@ -246,7 +246,7 @@ def main():
         # Concatenate files belonging to the same sample in the new directory,
         # run porechop and chopper
         samples_names = concatenate_files(args.folder, metadata, samples_to_process, out_folder)
-        run_porechop(samples_names, args.threads, out_folder
+        run_porechop(samples_names, args.threads, out_folder)
         run_chopper(samples_names, args.threads, out_folder)
 
     # Create the Qiime manifest, run qiime analysis
