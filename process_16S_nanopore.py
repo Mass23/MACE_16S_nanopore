@@ -187,6 +187,27 @@ def taxonomy_qiime2(results_folder_name):
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_4) + '\n\n')
 
+def export_qiime2(results_folder_name):
+    args_1 = ['qiime', 'tools', 'export', 
+              '--input-path', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza', 
+              '--output-path', f'{results_folder_name}/exported_sequences']
+    subprocess.call(' '.join(args_2), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_2) + '\n\n')
+
+    args_2 = ['qiime', 'tools', 'export', 
+              '--input-path', f'{results_folder_name}/qiime2/table-dereplicated.qza', 
+              '--output-path', f'{results_folder_name}/exported_table']
+    subprocess.call(' '.join(args_2), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_2) + '\n\n')
+
+    args_3 = ['qiime', 'tools', 'export', 
+              '--input-path', f'{results_folder_name}/qiime2/taxonomy-classification.qza', 
+              '--output-path', f'{results_folder_name}/exported_taxonomy']
+    subprocess.call(' '.join(args_3), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_3) + '\n\n')
 
 ################################################################################
 #################             MAIN             #################################
@@ -212,11 +233,9 @@ def main():
     # Parse arguments
     args = parser.parse_args()
 
-    if args.skippreprocessing:
-        continue
-    else:
-    # Create results folder, print the environment summary, load the metadata
-    # and list the samples to process
+    if args.skippreprocessing is None:
+        # Create results folder, print the environment summary, load the metadata
+        # and list the samples to process
         out_folder = f'{args.name}_results'
         create_result_folder(out_folder)
         print_env_summary(out_folder)
@@ -227,7 +246,7 @@ def main():
         # Concatenate files belonging to the same sample in the new directory,
         # run porechop and chopper
         samples_names = concatenate_files(args.folder, metadata, samples_to_process, out_folder)
-        run_porechop(samples_names, args.threads, out_folder)
+        run_porechop(samples_names, args.threads, out_folder
         run_chopper(samples_names, args.threads, out_folder)
 
     # Create the Qiime manifest, run qiime analysis
@@ -235,6 +254,7 @@ def main():
     import_qiime2(out_folder)
     dereplicate_qiime2(out_folder)
     taxonomy_qiime2(out_folder)
+    export_qiime2(out_folder)
 
 if __name__ == "__main__":
     main()
