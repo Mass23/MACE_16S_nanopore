@@ -139,13 +139,13 @@ def create_manifest(results_folder_name):
         log.write('Qiime2 manifest created...' + '\n\n')
 
 def import_qiime2(results_folder_name):
-    args = ['qiime', 'tools', 'import', '--type', "'SampleData[SequencesWithQuality]'",
+    args_1 = ['qiime', 'tools', 'import', '--type', "'SampleData[SequencesWithQuality]'",
             '--input-path', f'{results_folder_name}/qiime2/qiime2_manifest.tsv', 
             '--output-path' , f'{results_folder_name}/qiime2/preprocessed_reads.qza',
             '--input-format', 'SingleEndFastqManifestPhred33V2']
-    subprocess.call(' '.join(args), shell = True)
+    subprocess.call(' '.join(args_1), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args) + '\n\n')
+            log.write(' '.join(args_1) + '\n\n')
 
 def dereplicate_qiime2(results_folder_name):
     args = ['qiime', 'vsearch', 'dereplicate-sequences',
@@ -156,14 +156,14 @@ def dereplicate_qiime2(results_folder_name):
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args) + '\n\n')
 
-def taxonomy_qiime2(results_folder_name):
+def taxonomy_qiime2(results_folder_name, threads):
     args_1 = ['wget', '-P', f'{results_folder_name}/qiime2/',
     'http://ftp.microbio.me/greengenes_release/2022.10/2022.10.backbone.full-length.fna.qza']
     subprocess.call(' '.join(args_1), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_1) + '\n\n')
 
-    args_2 = ['qiime', 'greengenes2', 'non-v4-16s', 
+    args_2 = ['qiime', 'greengenes2', 'non-v4-16s','--p-threads', threads,  
               '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
               '--i-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza', 
               '--i-backbone', f'{results_folder_name}/qiime2/2022.10.backbone.full-length.fna.qza',
@@ -253,7 +253,7 @@ def main():
     create_manifest(out_folder)
     import_qiime2(out_folder)
     dereplicate_qiime2(out_folder)
-    taxonomy_qiime2(out_folder)
+    taxonomy_qiime2(out_folder, args.threads)
     export_qiime2(out_folder)
 
 if __name__ == "__main__":
