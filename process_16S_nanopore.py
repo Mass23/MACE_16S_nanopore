@@ -179,7 +179,8 @@ def dereplicate_qiime2(results_folder_name, threads):
 
     args_3 = ['qiime feature-table filter-features',
               '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza', 
-              '--m-metadata-file', 'uchime-dn-out/nonchimeras.qza',
+              '--m-metadata-file', 'uchime-dn-out/chimeras.qza',
+              '--p-exclude-ids',
               '--o-filtered-table', f'{results_folder_name}/qiime2/table-dereplicated-nonchimeric.qza']
     subprocess.call(' '.join(args_3), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
@@ -187,7 +188,8 @@ def dereplicate_qiime2(results_folder_name, threads):
     
     args_4 = ['qiime feature-table filter-seqs',
               '--i-data', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
-              '--m-metadata-file uchime-dn-out/nonchimeras.qza',
+              '--m-metadata-file uchime-dn-out/chimeras.qza',
+              '--p-exclude-ids',
               '--o-filtered-data', f'{results_folder_name}/qiime2/rep-seqs-dereplicated-nonchimeric.qza']
     subprocess.call(' '.join(args_4), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
