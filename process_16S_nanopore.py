@@ -165,16 +165,19 @@ def dereplicate_qiime2(results_folder_name, threads):
               '--i-sequences', f'{results_folder_name}/qiime2/preprocessed_reads.qza',
               '--o-dereplicated-table', f'{results_folder_name}/qiime2/table-dereplicated.qza', 
               '--o-dereplicated-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza']
-    
-    args_2 = ['cluster-features-de-novo',
-              '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
-              '--i-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
-              '--p-perc-identity','0.99',
-              '--o-clustered-table', f'{results_folder_name}/qiime2/otu-table.qza',
-              '--o-clustered-sequences', f'{results_folder_name}/qiime2/otu-seqs.qza']
     subprocess.call(' '.join(args_1), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_1) + '\n\n')
+
+    args_2 = ['cluster-features-de-novo',
+              '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
+              '--i-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
+              '--p-perc-identity', '0.99', '--p-strand', 'both', '--p-threads', threads,
+              '--o-clustered-table', f'{results_folder_name}/qiime2/otu-table.qza',
+              '--o-clustered-sequences', f'{results_folder_name}/qiime2/otu-seqs.qza']
+    subprocess.call(' '.join(args_2), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_2) + '\n\n')
 
     #args_2 = ['qiime vsearch uchime-denovo',
     #          '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
