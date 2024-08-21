@@ -260,15 +260,6 @@ def export_qiime2(results_folder_name):
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_3) + '\n\n')
 
-    args_4 = f"sed -i -e 's/Feature ID/#OTUID/g; s/Taxon/taxonomy/g; s/Confidence/confidence/g' {results_folder_name}/exported/taxonomy.tsv"
-    subprocess.call(args_4, shell = True)
-    
-    args_5 = ["biom add-metadata",
-              f"-i {results_folder_name}exported/feature-table.biom",
-              f"-o exported/table-with-taxonomy.biom", 
-              f"--observation-metadata-fp exported/taxonomy.tsv --sc-separated taxonomy"]
-    subprocess.call(' '.join(args_5), shell = True)
-
 ################################################################################
 #################             MAIN             #################################
 ################################################################################
