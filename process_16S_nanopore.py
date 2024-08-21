@@ -213,7 +213,7 @@ def taxonomy_qiime2(results_folder_name, threads):
         with open(f'{results_folder_name}/log.txt', 'a') as log:
                 log.write(' '.join(args_1) + '\n\n')
 
-    args_2 = ['qiime', 'greengenes2', 'non-v4-16s','--p-threads', threads,  
+    args_2 = ['qiime', 'greengenes2', 'non-v4-16s','--p-threads', threads, '--p-perc-identity', '0.97',
               '--i-table', f'{results_folder_name}/qiime2/otu-table.qza',
               '--i-sequences', f'{results_folder_name}/qiime2/otu-seqs.qza', 
               '--i-backbone', f'{results_folder_name}/qiime2/2022.10.backbone.full-length.fna.qza',
