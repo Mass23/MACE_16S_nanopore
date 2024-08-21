@@ -1,2 +1,2 @@
-python3 process_16S_nanopore.py -f alpine_soil/ -n alpine_soil -m metadata.tsv -t 48 --skippreprocessing
+python3 process_16S_nanopore.py -f pipeline_test_data/ -n pipeline_test -m metadata_test.tsv -t 72 --skippreprocessing
 

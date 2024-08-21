@@ -169,10 +169,10 @@ def dereplicate_qiime2(results_folder_name, threads):
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_1) + '\n\n')
 
-    args_2 = ['cluster-features-de-novo',
+    args_2 = ['qiime vsearch cluster-features-de-novo',
               '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
               '--i-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
-              '--p-perc-identity', '0.99', '--p-strand', 'both', '--p-threads', threads,
+              '--p-perc-identity', '0.97', '--p-strand', 'both', '--p-threads', threads,
               '--o-clustered-table', f'{results_folder_name}/qiime2/otu-table.qza',
               '--o-clustered-sequences', f'{results_folder_name}/qiime2/otu-seqs.qza']
     subprocess.call(' '.join(args_2), shell = True)
@@ -240,25 +240,34 @@ def taxonomy_qiime2(results_folder_name, threads):
 
 def export_qiime2(results_folder_name):
     args_1 = ['qiime', 'tools', 'export', 
-              '--input-path', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza', 
-              '--output-path', f'{results_folder_name}/exported_sequences']
+              '--input-path', f'{results_folder_name}/qiime2/otu-seqs.qza', 
+              '--output-path', f'{results_folder_name}/exports']
     subprocess.call(' '.join(args_1), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_1) + '\n\n')
 
     args_2 = ['qiime', 'tools', 'export', 
-              '--input-path', f'{results_folder_name}/qiime2/table-dereplicated.qza', 
-              '--output-path', f'{results_folder_name}/exported_table']
+              '--input-path', f'{results_folder_name}/qiime2/otu-table.qza', 
+              '--output-path', f'{results_folder_name}/exports']
     subprocess.call(' '.join(args_2), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_2) + '\n\n')
 
     args_3 = ['qiime', 'tools', 'export', 
               '--input-path', f'{results_folder_name}/qiime2/taxonomy-classification.qza', 
-              '--output-path', f'{results_folder_name}/exported_taxonomy']
+              '--output-path', f'{results_folder_name}/exports']
     subprocess.call(' '.join(args_3), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_3) + '\n\n')
+
+    args_4 = f"sed -i -e 's/Feature ID/#OTUID/g; s/Taxon/taxonomy/g; s/Confidence/confidence/g' {results_folder_name}/exported/taxonomy.tsv"
+    subprocess.call(args_4, shell = True)
+    
+    args_5 = ["biom add-metadata",
+              f"-i {results_folder_name}exported/feature-table.biom",
+              f"-o exported/table-with-taxonomy.biom", 
+              f"--observation-metadata-fp exported/taxonomy.tsv --sc-separated taxonomy"]
+    subprocess.call(' '.join(args_5), shell = True)
 
 ################################################################################
 #################             MAIN             #################################

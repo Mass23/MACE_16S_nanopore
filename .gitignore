@@ -2,4 +2,7 @@ data/
 alpine_soil/
 alpine_soil_results/
 alpine_test_results/
+pipeline_test_data/
+pipeline_test_results/
 metadata.tsv
+metadata_test.tsv
