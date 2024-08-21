@@ -139,7 +139,10 @@ def create_manifest(results_folder_name):
         log.write('Qiime2 manifest created...' + '\n\n')
 
 def import_qiime2(results_folder_name):
-    args_1 = ['qiime', 'tools', 'import', '--type', "'SampleData[SequencesWithQuality]'",
+    """
+    Import the data into qiime with a manifest, print the visualisation for quality assessement.
+    """
+    args_1 = ['qiime tools import', '--type', "'SampleData[SequencesWithQuality]'",
             '--input-path', f'{results_folder_name}/qiime2/qiime2_manifest.tsv', 
             '--output-path' , f'{results_folder_name}/qiime2/preprocessed_reads.qza',
             '--input-format', 'SingleEndFastqManifestPhred33V2']
@@ -147,14 +150,49 @@ def import_qiime2(results_folder_name):
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_1) + '\n\n')
 
-def dereplicate_qiime2(results_folder_name):
-    args = ['qiime', 'vsearch', 'dereplicate-sequences',
+    args_2 = ['qiime demux summarize',
+             '--i-data', f'{results_folder_name}/qiime2/preprocessed_reads.qza',
+             '--o-visualization', f'{results_folder_name}/qiime2/preprocessed_reads.qzv']
+    subprocess.call(' '.join(args_2), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_2) + '\n\n')
+
+def dereplicate_qiime2(results_folder_name, threads):
+    """
+    Dereplicate sequences and do chimera removal steps using uchime denovo.
+    """
+    args_1 = ['qiime vsearch dereplicate-sequences',
             '--i-sequences', f'{results_folder_name}/qiime2/preprocessed_reads.qza',
             '--o-dereplicated-table', f'{results_folder_name}/qiime2/table-dereplicated.qza', 
             '--o-dereplicated-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza']
-    subprocess.call(' '.join(args), shell = True)
+    subprocess.call(' '.join(args_1), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args) + '\n\n')
+            log.write(' '.join(args_1) + '\n\n')
+
+    args_2 = ['qiime vsearch uchime-denovo',
+              '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
+              '--i-sequences',  f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
+              '--output-dir', f'{results_folder_name}/qiime2/uchime-dn-out',
+              '--p-threads', threads]
+    subprocess.call(' '.join(args_2), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_2) + '\n\n')
+
+    args_3 = ['qiime feature-table filter-features',
+              '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza', 
+              '--m-metadata-file', 'uchime-dn-out/nonchimeras.qza',
+              '--o-filtered-table', f'{results_folder_name}/qiime2/table-dereplicated-nonchimeric.qza']
+    subprocess.call(' '.join(args_3), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_3) + '\n\n')
+    
+    args_4 = ['qiime feature-table filter-seqs',
+              '--i-data', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
+              '--m-metadata-file uchime-dn-out/nonchimeras.qza',
+              '--o-filtered-data', f'{results_folder_name}/qiime2/rep-seqs-dereplicated-nonchimeric.qza']
+    subprocess.call(' '.join(args_4), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_4) + '\n\n')
 
 def taxonomy_qiime2(results_folder_name, threads):
     args_1 = ['wget', '-P', f'{results_folder_name}/qiime2/',
@@ -164,8 +202,8 @@ def taxonomy_qiime2(results_folder_name, threads):
             log.write(' '.join(args_1) + '\n\n')
 
     args_2 = ['qiime', 'greengenes2', 'non-v4-16s','--p-threads', threads,  
-              '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
-              '--i-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza', 
+              '--i-table', f'{results_folder_name}/qiime2/table-dereplicated-nonchimeric.qza',
+              '--i-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated-nonchimeric.qza', 
               '--i-backbone', f'{results_folder_name}/qiime2/2022.10.backbone.full-length.fna.qza',
               '--o-mapped-table', f'{results_folder_name}/qiime2/taxonomy-mapped-table.qza', 
               '--o-representatives', f'{results_folder_name}/qiime2/rep-seqs-taxonomy.qza']
@@ -189,14 +227,14 @@ def taxonomy_qiime2(results_folder_name, threads):
 
 def export_qiime2(results_folder_name):
     args_1 = ['qiime', 'tools', 'export', 
-              '--input-path', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza', 
+              '--input-path', f'{results_folder_name}/qiime2/rep-seqs-dereplicated-nonchimeric.qza', 
               '--output-path', f'{results_folder_name}/exported_sequences']
     subprocess.call(' '.join(args_1), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_1) + '\n\n')
 
     args_2 = ['qiime', 'tools', 'export', 
-              '--input-path', f'{results_folder_name}/qiime2/table-dereplicated.qza', 
+              '--input-path', f'{results_folder_name}/qiime2/table-dereplicated-nonchimeric.qza', 
               '--output-path', f'{results_folder_name}/exported_table']
     subprocess.call(' '.join(args_2), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
@@ -252,7 +290,7 @@ def main():
     # Create the Qiime manifest, run qiime analysis
     create_manifest(out_folder)
     import_qiime2(out_folder)
-    dereplicate_qiime2(out_folder)
+    dereplicate_qiime2(out_folder, args.threads)
     taxonomy_qiime2(out_folder, args.threads)
     export_qiime2(out_folder)
 
