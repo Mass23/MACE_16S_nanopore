@@ -172,12 +172,28 @@ def dereplicate_qiime2(results_folder_name, threads):
     args_2 = ['qiime vsearch cluster-features-de-novo',
               '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
               '--i-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
-              '--p-perc-identity', '0.97', '--p-strand', 'both', '--p-threads', threads,
+              '--p-perc-identity', '0.97', '--p-threads', threads,
               '--o-clustered-table', f'{results_folder_name}/qiime2/otu-table.qza',
               '--o-clustered-sequences', f'{results_folder_name}/qiime2/otu-seqs.qza']
     subprocess.call(' '.join(args_2), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_2) + '\n\n')
+
+    args_3 = ['qiime feature-table filter-features',
+              '--i-table', f'{results_folder_name}/qiime2/otu-table.qza',
+              '--p-min-frequency', '2', 
+              '--o-filtered-table', f'{results_folder_name}/qiime2/otu-table-filtered.qza']
+    subprocess.call(' '.join(args_3), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_3) + '\n\n')
+
+    args_4 = ['qiime feature-table filter-seqs',
+              '--i-data', f'{results_folder_name}/qiime2/otu-seqs.qza',
+              '--i-table', f'{results_folder_name}/qiime2/otu-table-filtered.qza',
+              '--o-filtered-data', f'{results_folder_name}/qiime2/otu-seqs-filtered.qza']
+    subprocess.call(' '.join(args_4), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_4) + '\n\n')
 
     #args_2 = ['qiime vsearch uchime-denovo',
     #          '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
@@ -214,8 +230,8 @@ def taxonomy_qiime2(results_folder_name, threads):
                 log.write(' '.join(args_1) + '\n\n')
 
     args_2 = ['qiime', 'greengenes2', 'non-v4-16s','--p-threads', threads, '--p-perc-identity', '0.97',
-              '--i-table', f'{results_folder_name}/qiime2/otu-table.qza',
-              '--i-sequences', f'{results_folder_name}/qiime2/otu-seqs.qza', 
+              '--i-table', f'{results_folder_name}/qiime2/otu-table-filtered.qza',
+              '--i-sequences', f'{results_folder_name}/qiime2/otu-seqs-filtered.qza', 
               '--i-backbone', f'{results_folder_name}/qiime2/2022.10.backbone.full-length.fna.qza',
               '--o-mapped-table', f'{results_folder_name}/qiime2/taxonomy-mapped-table.qza', 
               '--o-representatives', f'{results_folder_name}/qiime2/rep-seqs-taxonomy.qza']
@@ -240,14 +256,14 @@ def taxonomy_qiime2(results_folder_name, threads):
 
 def export_qiime2(results_folder_name):
     args_1 = ['qiime', 'tools', 'export', 
-              '--input-path', f'{results_folder_name}/qiime2/otu-seqs.qza', 
+              '--input-path', f'{results_folder_name}/qiime2/otu-seqs-filtered.qza', 
               '--output-path', f'{results_folder_name}/exports']
     subprocess.call(' '.join(args_1), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_1) + '\n\n')
 
     args_2 = ['qiime', 'tools', 'export', 
-              '--input-path', f'{results_folder_name}/qiime2/otu-table.qza', 
+              '--input-path', f'{results_folder_name}/qiime2/otu-table-filtered.qza', 
               '--output-path', f'{results_folder_name}/exports']
     subprocess.call(' '.join(args_2), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
