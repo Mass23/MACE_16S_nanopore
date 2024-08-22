@@ -195,6 +195,9 @@ def dereplicate_qiime2(results_folder_name, threads):
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_4) + '\n\n')
 
+    args_5 = f'qiime feature-table summarize --i-table {results_folder_name}/qiime2/otu-table-filtered.qza --o-visualization {results_folder_name}/qiime2/otu-table-filtered.qzv'
+    subprocess.call(args_5, shell = True)
+    
     #args_2 = ['qiime vsearch uchime-denovo',
     #          '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
     #          '--i-sequences',  f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
