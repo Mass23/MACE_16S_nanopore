@@ -172,7 +172,7 @@ def dereplicate_qiime2(results_folder_name, threads):
     args_2 = ['qiime vsearch cluster-features-de-novo',
               '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
               '--i-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
-              '--p-perc-identity', '0.97', '--p-threads', threads,
+              '--p-perc-identity', '0.95', '--p-threads', threads,
               '--o-clustered-table', f'{results_folder_name}/qiime2/otu-table.qza',
               '--o-clustered-sequences', f'{results_folder_name}/qiime2/otu-seqs.qza']
     subprocess.call(' '.join(args_2), shell = True)
