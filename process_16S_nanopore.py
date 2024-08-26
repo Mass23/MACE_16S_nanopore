@@ -236,7 +236,7 @@ def taxonomy_qiime2(results_folder_name, threads):
     args_2 = ['qiime feature-classifier classify-sklearn','--p-n-jobs', threads,
               '--i-reads', f'{results_folder_name}/qiime2/otu-seqs-filtered.qza', 
               '--i-classifier', f'{results_folder_name}/qiime2/2022.10.backbone.full-length.nb.sklearn-1.4.2.qza',
-              '--o-representatives', f'{results_folder_name}/qiime2/taxonomy-classification.qza']
+              '--o-classification', f'{results_folder_name}/qiime2/taxonomy-classification.qza']
     subprocess.call(' '.join(args_2), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_2) + '\n\n')
