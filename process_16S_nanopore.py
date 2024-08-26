@@ -227,35 +227,18 @@ def dereplicate_qiime2(results_folder_name, threads):
 def taxonomy_qiime2(results_folder_name, threads):
     if not os.path.exists(f'{results_folder_name}/qiime2/2022.10.backbone.full-length.fna.qza'):
         args_1 = ['wget', '-P', f'{results_folder_name}/qiime2/',
-        'http://ftp.microbio.me/greengenes_release/2022.10/2022.10.backbone.full-length.fna.qza']
+        'http://ftp.microbio.me/greengenes_release/current/sklearn-1.4.2-compatible-nb-classifiers/2022.10.backbone.full-length.nb.sklearn-1.4.2.qza']
         subprocess.call(' '.join(args_1), shell = True)
         with open(f'{results_folder_name}/log.txt', 'a') as log:
                 log.write(' '.join(args_1) + '\n\n')
 
-    args_2 = ['qiime', 'greengenes2', 'non-v4-16s','--p-threads', threads, '--p-perc-identity', '0.97',
-              '--i-table', f'{results_folder_name}/qiime2/otu-table-filtered.qza',
-              '--i-sequences', f'{results_folder_name}/qiime2/otu-seqs-filtered.qza', 
-              '--i-backbone', f'{results_folder_name}/qiime2/2022.10.backbone.full-length.fna.qza',
-              '--o-mapped-table', f'{results_folder_name}/qiime2/taxonomy-mapped-table.qza', 
-              '--o-representatives', f'{results_folder_name}/qiime2/rep-seqs-taxonomy.qza']
+    args_2 = ['qiime feature-classifier classify-sklearn','--p-n-jobs', threads,
+              '--i-reads', f'{results_folder_name}/qiime2/otu-seqs-filtered.qza', 
+              '--i-classifier', f'{results_folder_name}/qiime2/2022.10.backbone.full-length.nb.sklearn-1.4.2.qza',
+              '--o-representatives', f'{results_folder_name}/qiime2/taxonomy-classification.qza']
     subprocess.call(' '.join(args_2), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_2) + '\n\n')
-
-    if not os.path.exists(f'{results_folder_name}/qiime2/2022.10.taxonomy.asv.nwk.qza'):
-        args_3 = ['wget', '-P', f'{results_folder_name}/qiime2/',
-        'http://ftp.microbio.me/greengenes_release/2022.10/2022.10.taxonomy.asv.nwk.qza']
-        subprocess.call(' '.join(args_3), shell = True)
-        with open(f'{results_folder_name}/log.txt', 'a') as log:
-                log.write(' '.join(args_3) + '\n\n')
-
-    args_4 = ['qiime', 'greengenes2', 'taxonomy-from-table',
-              '--i-reference-taxonomy', f'{results_folder_name}/qiime2/2022.10.taxonomy.asv.nwk.qza',
-              '--i-table', f'{results_folder_name}/qiime2/taxonomy-mapped-table.qza', 
-              '--o-classification', f'{results_folder_name}/qiime2/taxonomy-classification.qza']
-    subprocess.call(' '.join(args_4), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_4) + '\n\n')
 
 def export_qiime2(results_folder_name):
     args_1 = ['qiime', 'tools', 'export', 
