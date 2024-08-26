@@ -170,6 +170,7 @@ def dereplicate_qiime2(results_folder_name, threads):
             log.write(' '.join(args_1) + '\n\n')
 
     args_2 = ['qiime vsearch cluster-features-de-novo',
+              '--p-strand', 'both',
               '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
               '--i-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
               '--p-perc-identity', '0.97', '--p-threads', threads,
