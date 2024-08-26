@@ -111,7 +111,7 @@ def run_chopper(samples, threads, results_folder_name):
         reads_in = f'{results_folder_name}/raw_data/{sample}_porechopped.fastq.gz'
         reads_out = f'{results_folder_name}/raw_data/{sample}_chopped.fastq.gz'
         args = ['gunzip', '-c', reads_in, '|',
-                'chopper', '-q', str(10), '--maxlength', str(1800),
+                'chopper', '-q', str(12), '--maxlength', str(1800),
                            '--minlength', str(1200), '--threads', str(threads),
                 '|', 'gzip', '>', reads_out]
         subprocess.call(' '.join(args), shell = True)
@@ -198,6 +198,7 @@ def dereplicate_qiime2(results_folder_name, threads):
     args_5 = f'qiime feature-table summarize --i-table {results_folder_name}/qiime2/otu-table-filtered.qza --o-visualization {results_folder_name}/qiime2/otu-table-filtered.qzv'
     subprocess.call(args_5, shell = True)
     
+    # if one day chimera detection is needed
     #args_2 = ['qiime vsearch uchime-denovo',
     #          '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
     #          '--i-sequences',  f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
