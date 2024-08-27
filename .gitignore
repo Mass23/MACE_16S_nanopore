@@ -6,3 +6,7 @@ pipeline_test_data/
 pipeline_test_results/
 metadata.tsv
 metadata_test.tsv
+helicopter_2023_part1_results/
+barcodes_hel2023_pt1.tsv
+ap_soil_16S_2023_metadata.tsv
+ap_soil_16S_2023/

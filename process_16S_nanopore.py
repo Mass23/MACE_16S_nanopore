@@ -115,6 +115,7 @@ def run_chopper(samples, threads, results_folder_name):
                            '--minlength', str(1200), '--threads', str(threads),
                 '|', 'gzip', '>', reads_out]
         subprocess.call(' '.join(args), shell = True)
+        subprocess.call(f'rm {reads_in}', shell = True)
 
         with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args) + '\n\n')
@@ -283,6 +284,8 @@ def main():
                         help="Number of threads to use for multiprocessing-compatible tasks", required=True)
     parser.add_argument("--skippreprocessing", action='store_true',
                         help="To add if you want to skip preprocessing")
+    parser.add_argument("--skipqiime2", action='store_true',
+                        help="To add if you want to skip the qiime2 part (only preprocessing)")
 
 
     # Parse arguments
@@ -304,12 +307,13 @@ def main():
         run_porechop(samples_names, args.threads, out_folder)
         run_chopper(samples_names, args.threads, out_folder)
 
-    # Create the Qiime manifest, run qiime analysis
-    create_manifest(out_folder)
-    import_qiime2(out_folder)
-    dereplicate_qiime2(out_folder, args.threads)
-    taxonomy_qiime2(out_folder, args.threads)
-    export_qiime2(out_folder)
+    if args.skipqiime2 is False:
+        # Create the Qiime manifest, run qiime analysis
+        create_manifest(out_folder)
+        import_qiime2(out_folder)
+        dereplicate_qiime2(out_folder, args.threads)
+        taxonomy_qiime2(out_folder, args.threads)
+        export_qiime2(out_folder)
 
 if __name__ == "__main__":
     main()
