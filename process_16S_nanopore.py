@@ -49,6 +49,11 @@ def list_subfolders(folder_path):
     except Exception as e:
         print(f"An error occurred: {e}")
 
+def list_files(folder_path):
+    files = glob.glob(f'{folder_path}/*.fastq.gz')
+    samples = [file.replace('.fastq.gz','').split('/')[-1] for file in files]
+    return(samples)
+
 def check_metadata_samples(metadata, samples, results_folder_name):
     """
     Check that the metadata agrees with the sample names listed.
@@ -81,7 +86,7 @@ def concatenate_files(folder_path, metadata, samples, results_folder_name):
     for sample in samples:
         new_sample = metadata.loc[metadata['Barcode'] == sample, '#SampleID'].values[0]
         new_path = f'{results_folder_name}/raw_data/{new_sample}.fastq.gz'
-        args = ['cat', folder_path + sample + '/*.fastq.gz', '>', new_path]
+        args = ['cat', f'{folder_path}/{sample}.fastq.gz', '>', new_path]
         subprocess.call(' '.join(args), shell = True)
         new_samples.append(new_sample)
     return(new_samples)
@@ -298,7 +303,7 @@ def main():
         create_result_folder(out_folder)
         print_env_summary(out_folder)
         metadata = load_metadata(args.metadata_file)
-        samples = list_subfolders(args.folder)
+        samples = list_files(args.folder)
         metadata, samples_to_process = check_metadata_samples(metadata, samples, out_folder)
 
         # Concatenate files belonging to the same sample in the new directory,
