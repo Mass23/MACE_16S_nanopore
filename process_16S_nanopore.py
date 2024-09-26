@@ -163,7 +163,7 @@ def import_qiime2(results_folder_name):
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_2) + '\n\n')
 
-def dereplicate_qiime2(results_folder_name, threads):
+def dereplicate_qiime2(results_folder_name, threads, perc_identity):
     """
     Dereplicate sequences and do chimera removal steps using uchime denovo.
     """
@@ -179,7 +179,7 @@ def dereplicate_qiime2(results_folder_name, threads):
               '--p-strand', 'both',
               '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
               '--i-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
-              '--p-perc-identity', '0.97', '--p-threads', threads,
+              '--p-perc-identity', perc_identity, '--p-threads', threads,
               '--o-clustered-table', f'{results_folder_name}/qiime2/otu-table.qza',
               '--o-clustered-sequences', f'{results_folder_name}/qiime2/otu-seqs.qza']
     subprocess.call(' '.join(args_2), shell = True)
@@ -291,6 +291,8 @@ def main():
                         help="To add if you want to skip preprocessing")
     parser.add_argument("--skipqiime2", action='store_true',
                         help="To add if you want to skip the qiime2 part (only preprocessing)")
+    parser.add_argument("--perc_identity", action='store_true', default='0.97',
+                        help="To add if you want to skip the qiime2 part (only preprocessing)")
 
 
     # Parse arguments
@@ -316,7 +318,7 @@ def main():
         # Create the Qiime manifest, run qiime analysis
         create_manifest(out_folder)
         import_qiime2(out_folder)
-        dereplicate_qiime2(out_folder, args.threads)
+        dereplicate_qiime2(out_folder, args.threads, perc_identity)
         taxonomy_qiime2(out_folder, args.threads)
         export_qiime2(out_folder)
 
