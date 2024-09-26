@@ -12,6 +12,9 @@ import glob
 # Preprocessing part
 
 def create_result_folder(results_folder_name):
+    """
+    Creates a folder results, if the folder already exists, does not overwrites it.
+    """
     if not os.path.exists(results_folder_name):
         os.makedirs(results_folder_name)
     
@@ -19,12 +22,17 @@ def create_result_folder(results_folder_name):
         log.write(f"Log file for the run {results_folder_name}, time and date: {datetime.datetime.now().strftime('%I:%M%p on %B %d, %Y')}" + '\n\n')
 
 def print_env_summary(results_folder_name):
+    """
+    Print the conda environment list (packages and softwares with version numbers).
+    """
     subprocess.call(f'conda list > {results_folder_name}/list_conda.txt', shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
         log.write('Creating the list_conda.txt file that summarises the conda env.' + '\n\n')
 
-
 def load_metadata(metadata_path):
+    """
+    Load the metadata as a pandas data frame.
+    """
     metadata = pd.read_csv(metadata_path, sep='\t', header=0)
     return(metadata)
 
@@ -50,6 +58,9 @@ def list_subfolders(folder_path):
         print(f"An error occurred: {e}")
 
 def list_files(folder_path):
+    """
+    List the fastq.gz files in the specifiec raw reads directory.
+    """
     files = glob.glob(f'{folder_path}/*.fastq.gz')
     samples = [file.replace('.fastq.gz','').split('/')[-1] for file in files]
     return(samples)
