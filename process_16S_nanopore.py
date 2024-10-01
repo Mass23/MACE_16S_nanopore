@@ -329,7 +329,7 @@ def main():
         # Create the Qiime manifest, run qiime analysis
         create_manifest(out_folder)
         import_qiime2(out_folder)
-        dereplicate_qiime2(out_folder, args.threads, perc_identity)
+        dereplicate_qiime2(out_folder, args.threads, args.perc_identity)
         taxonomy_qiime2(out_folder, args.threads)
         export_qiime2(out_folder)
 
