@@ -4,31 +4,30 @@
 
 # 1. Installation & Usage
 
-  a.  The data must have been processed using dorado with the 'sup' model. Here is the code to do this, it should yield one directory containing the fastq_pass files, you will use this directory as a starting point for the pipeline:
-  ```
-  # installation
-  wget https://cdn.oxfordnanoportal.com/software/analysis/dorado-{LATEST VERSION}-linux-x64.tar.gz
-  tar -xvzf dorado-{LATEST VERSION}-linux-x64.tar.gz
- 
-# check installation
-tools/dorado-{LATEST VERSION}-linux-x64/bin/dorado basecaller -h
- 
-# output demultiplexed trimmed reads into one bam file
-# use -r for searching multiple subdirectories
-../tools/dorado-0.7.3-linux-x64/bin/dorado basecaller sup -r ../raw_data/gl_soil_ampl_2023/pod5/ --kit-name SQK-NBD114-96 > calls.bam
- 
-# output fastq file for each barcode
-../tools/dorado-0.7.3-linux-x64/bin/dorado demux --output-dir . --emit-fastq --no-classify calls.bam
-```
- --> also gzip the fastq files after basecalling, for this run `gzip *` inside the fastq files dir.
- to remove the suffix before the barcodes: `rename s/SUFFIX_// S*.fastq`
- to gzip all fastq files: `gzip *.fastq`
+  a. Clone the Github repo `git clone https://github.com/Mass23/MACE_16S_nanopore`
 
-  b. Clone the Github repo `git clone https://github.com/Mass23/MACE_16S_nanopore`, place the data folder (reads) inside the repository
+  b. Install both the "basecalling.yml" and "MACE_16S_nanopore.yml" conda environments:
+```
+conda env create --name basecalling --file=basecalling.yml
+conda env create --name MACE_16S_nanopore --file=MACE_16S_nanopore.yml
+```
+  Then activate the "basecalling" environment: `conda activate basecalling`
+
+  b. Run the basecalling on the pod5 files, if needed use the `pod5 merge *.pod5 -o merged.pod5` function of the basecalling environment to merge all failed and pass pod5 files.
+
+  c. Run the basecalling using dorado with the "sup" model: `dorado basecaller sup -r merged.pod5 --kit-name SQK-NBD114-96 > calls.bam`, subsequently demultiplex the bam file: `dorado demux --output_dir WHERE_YOU_WANT_IT --emit-fastq --no-classify calls.bam`
+
+  d. You will then need to remove the kit name suffix, and gzip these files (from within the fastq files directory)
+```
+rename s/SUFFIX_// S*.fastq
+gzip *.fastq
+```
   
-  c. Create the conda environment `conda env create -f MACE_16S_nanopore.yml \ conda activate MACE_16S_nanopore`
+  e. Activate the "MACE_16S_nanopore" conda environment `conda activate MACE_16S_nanopore`
   
-  c. Run example (in the example file) `python3 process_16S_nanopore.py -f alpine_soil/ -n alpine_soil -m metadata.tsv -t 24` from within the repository, -f is the data folder (reads), -n is the name for the output, metadata.tsv is the metadata file (look at the one in the repo for guidance, needs the Barcode and Well columns), -t is the numbers of threads to use.
+  f. Run the pipeline by updating the "example.sh" file, and running it as a bash script: `bash example.sh` (don't forget to create a screen because it may run for a while)
+  
+  example run: `python3 process_16S_nanopore.py -f /data/alpine_soil/ -n alpine_soil -m metadata.tsv -t 24` from within the repository, -f is the data folder (reads), -n is the name for the output, metadata.tsv is the metadata file (look at the one in the repo for guidance, needs the Barcode and #SampleID columns), -t is the numbers of threads to use.
 
 # 2. Description
 
