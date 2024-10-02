@@ -21,6 +21,8 @@ tools/dorado-{LATEST VERSION}-linux-x64/bin/dorado basecaller -h
 ../tools/dorado-0.7.3-linux-x64/bin/dorado demux --output-dir . --emit-fastq --no-classify calls.bam
 ```
  --> also gzip the fastq files after basecalling, for this run `gzip *` inside the fastq files dir.
+ to remove the suffix before the barcodes: `rename s/SUFFIX_// S*.fastq`
+ to gzip all fastq files: `gzip *.fastq`
 
   b. Clone the Github repo `git clone https://github.com/Mass23/MACE_16S_nanopore`, place the data folder (reads) inside the repository
   
