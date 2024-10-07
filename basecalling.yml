@@ -22,3 +22,4 @@ dependencies:
   - python_abi=3.8=5_cp38
   - sysroot_linux-64=2.17=h4a8ded7_17
   - tzdata=2024a=h8827d51_1
+  - pod5=0.3.15
