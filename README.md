@@ -15,7 +15,7 @@ conda env create --name MACE_16S_nanopore --file=MACE_16S_nanopore.yml
 
   b. Run the basecalling on the pod5 files, if needed use the `pod5 merge *.pod5 -o merged.pod5` function of the basecalling environment to merge all failed and pass pod5 files. (to install pod5 run `/home/USER/anaconda3/envs/basecalling/bin/pip install pod5`)
 
-  c. Run the basecalling using dorado with the "sup" model: `dorado basecaller sup -r merged.pod5 --kit-name SQK-NBD114-96 > calls.bam`, subsequently demultiplex the bam file: `dorado demux --output_dir WHERE_YOU_WANT_IT --emit-fastq --no-classify calls.bam`
+  c. Run the basecalling using dorado with the "sup" model: `dorado basecaller sup -r merged.pod5 --kit-name SQK-NBD114-96 > calls.bam`, subsequently demultiplex the bam file: `dorado demux --output-dir WHERE_YOU_WANT_IT --emit-fastq --no-classify calls.bam`
 
   d. You will then need to remove the kit name suffix, and gzip these files (from within the fastq files directory)
 ```
