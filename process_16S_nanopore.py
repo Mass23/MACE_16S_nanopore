@@ -33,6 +33,7 @@ def load_metadata(metadata_path, extension):
     """
     Load the metadata as a pandas data frame.
     """
+    print(extensions)
     if extension == 'tsv':
         metadata = pd.read_csv(metadata_path, sep='\t', header=0)
     elif extension == 'csv':
