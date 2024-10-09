@@ -13,7 +13,7 @@ conda env create --name MACE_16S_nanopore --file=MACE_16S_nanopore.yml
 ```
   Then activate the "basecalling" environment: `conda activate basecalling`
 
-  b. Run the basecalling on the pod5 files, if needed use the `pod5 merge *.pod5 -o merged.pod5` function of the basecalling environment to merge all failed and pass pod5 files. (to install pod5 run `/home/USER/anaconda3/envs/basecalling/bin/pip install pod5`)
+  b. Merge the pod5 files, use the `pod5 merge *.pod5 -o merged.pod5` function of the basecalling environment to merge all failed and pass pod5 files. (if needed install pod5 run `/home/USER/anaconda3/envs/basecalling/bin/pip install pod5`)
 
   c. Run the basecalling using dorado with the "sup" model, subsequently demultiplex the bam file and output fastq files: 
   ```
