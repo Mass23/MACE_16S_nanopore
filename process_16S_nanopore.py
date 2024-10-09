@@ -37,8 +37,8 @@ def load_metadata(metadata_path, extension):
     if extension == 'tsv':
         metadata = pd.read_csv(metadata_path, sep='\t', header=0)
     elif extension == 'csv':
-        print('hi')
         metadata = pd.read_csv(metadata_path, sep=',', header=0)
+        print(metadata.head())
     else:
         print('Only tsv or csv files are accepted!!!')
     return(metadata)
