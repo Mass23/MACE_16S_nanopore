@@ -29,11 +29,16 @@ def print_env_summary(results_folder_name):
     with open(f'{results_folder_name}/log.txt', 'a') as log:
         log.write('Creating the list_conda.txt file that summarises the conda env.' + '\n\n')
 
-def load_metadata(metadata_path):
+def load_metadata(metadata_path, extension):
     """
     Load the metadata as a pandas data frame.
     """
-    metadata = pd.read_csv(metadata_path, sep='\t', header=0)
+    if extension == 'tsv':
+        metadata = pd.read_csv(metadata_path, sep='\t', header=0)
+    elif extension == 'csv':
+        metadata = pd.read_csv(metadata_path, sep=',', header=0)
+    else:
+        print('Only tsv or csv files are accepted!!!')
     return(metadata)
 
 def list_subfolders(folder_path):
@@ -315,7 +320,8 @@ def main():
         # and list the samples to process
         create_result_folder(out_folder)
         print_env_summary(out_folder)
-        metadata = load_metadata(args.metadata_file)
+        ext = args.metadata_file.split('.')[-1]
+        metadata = load_metadata(args.metadata_file, ext)
         samples = list_files(args.folder)
         metadata, samples_to_process = check_metadata_samples(metadata, samples, out_folder)
 
