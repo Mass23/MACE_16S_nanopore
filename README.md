@@ -19,7 +19,7 @@ conda env create --name MACE_16S_nanopore --file=MACE_16S_nanopore.yml
   ```
   /data/databases/dorado/dorado-0.8.1-linux-x64/bin/dorado basecaller sup -r merged.pod5 --kit-name SQK-NBD114-96 > calls.bam
   /data/databases/dorado/dorado-0.8.1-linux-x64/bin/dorado demux --output-dir WHERE_YOU_WANT_IT --emit-fastq --no-classify calls.bam
-  ``
+  ```
 
   d. You will then need to remove the kit name suffix, and gzip these files (from within the fastq files directory)
 ```
