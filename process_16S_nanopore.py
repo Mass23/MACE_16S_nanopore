@@ -104,8 +104,8 @@ def concatenate_files(folder_path, metadata, samples, results_folder_name):
     for sample in samples:
         new_sample = metadata.loc[metadata['Barcode'] == sample, '#SampleID'].values[0]
         new_path = f'{results_folder_name}/raw_data/{new_sample}.fastq.gz'
-        args = ['cat', f'{folder_path}/{sample}.fastq.gz', '>', new_path]
-        subprocess.call(' '.join(args), shell = True)
+        args = f'cat {folder_path}/{sample}.fastq.gz > {new_path}'
+        subprocess.call(args, shell = True)
         new_samples.append(new_sample)
     return(new_samples)
 
@@ -116,26 +116,19 @@ def run_porechop(samples, threads, results_folder_name):
     for sample in samples:
         reads_in = f'{results_folder_name}/raw_data/{sample}.fastq.gz'
         reads_out = f'{results_folder_name}/raw_data/{sample}_porechopped.fastq.gz'
-        args = ['porechop', '--threads', str(threads), '-i', reads_in, '-o',
-                reads_out]
-        subprocess.call(' '.join(args), shell = True)
+        args = f'porechop --threads {str(threads)} -i {reads_in} -o {reads_out}'
+        subprocess.call(args, shell = True)
+        add_to_log(args)
 
-        add_to_log(' '.join(args))
-
-def run_chopper(samples, threads, results_folder_name):
+def run_chopper(samples, threads, results_folder_name, qual_threshold):
     add_to_log(f'Running chopper...')
 
     for sample in samples:
         reads_in = f'{results_folder_name}/raw_data/{sample}_porechopped.fastq.gz'
         reads_out = f'{results_folder_name}/raw_data/{sample}_chopped.fastq.gz'
-        args = ['gunzip', '-c', reads_in, '|',
-                'chopper', '-q', str(12), '--maxlength', str(1800),
-                           '--minlength', str(1200), '--threads', str(threads),
-                '|', 'gzip', '>', reads_out]
-        subprocess.call(' '.join(args), shell = True)
-        subprocess.call(f'rm {reads_in}', shell = True)
-
-        add_to_log(' '.join(args) + '\n\n')
+        args = f'gunzip -c {reads_in} | chopper -q {str(qual_threshold)) --maxlength 1800 --minlength 1200 --threads {str(threads)} | gzip > {reads_out}'
+        subprocess.call(args, shell = True)
+        add_to_log(args)
 
 # vsearch part
 def run_vsearch(results_folder_name, samples, threads, perc_identity):
@@ -215,6 +208,8 @@ def main():
                         help="To add if you want to skip the qiime2 part (only preprocessing).")
     parser.add_argument("--perc_identity", action='store_true', default='0.97',
                         help="To add if you want to perform OTU clustering at a different threshold, default is 97%.")
+    parser.add_argument("--qual_threshold", action='store_true', default='12',
+                        help="To add if you want to change the quality threshold for chopper, default is 12.")
 
 
     # Parse arguments
@@ -235,7 +230,7 @@ def main():
         # run porechop and chopper
         samples_names = concatenate_files(args.folder, metadata, samples_to_process, out_folder)
         run_porechop(samples_names, args.threads, out_folder)
-        run_chopper(samples_names, args.threads, out_folder)
+        run_chopper(samples_names, args.threads, out_folder, args.qual_threshold)
 
     if args.skipqiime2 is False:
         # Create the Qiime manifest, run qiime analysis
