@@ -110,7 +110,6 @@ def concatenate_files(folder_path, metadata, samples, results_folder_name):
 
 
 # Reads preprocessing part
-
 def run_porechop(samples, threads, results_folder_name):
     with open(f'{results_folder_name}/log.txt', 'a') as log:
         log.write(f'Running porechop...' + '\n\n')
@@ -199,7 +198,7 @@ def chimera_removal_qiime2(results_folder_name):
             log.write(' '.join(args_6) + '\n\n')
     
     args_7 = ['qiime feature-table filter-features',
-              '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza', 
+              '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
               '--m-metadata-file', f'{results_folder_name}/qiime2/uchime-dn-out/chimeras.qza',
               '--p-exclude-ids',
               '--o-filtered-table', f'{results_folder_name}/qiime2/table-dereplicated-nonchimeric.qza']
@@ -218,7 +217,7 @@ def chimera_removal_qiime2(results_folder_name):
 
 def taxonomy_qiime2(results_folder_name, classifier_path, threads):
     args_2 = ['qiime feature-classifier classify-sklearn','--p-n-jobs', threads,
-              '--i-reads', f'{results_folder_name}/qiime2/otu-seqs-filtered.qza', 
+              '--i-reads', f'{results_folder_name}/qiime2/rep-seqs-dereplicated-nonchimeric.qza',
               '--i-classifier', classifier_path,
               '--o-classification', f'{results_folder_name}/qiime2/taxonomy-classification.qza']
     subprocess.call(' '.join(args_2), shell = True)
@@ -226,7 +225,7 @@ def taxonomy_qiime2(results_folder_name, classifier_path, threads):
             log.write(' '.join(args_2) + '\n\n')
 
     args_3 = ['qiime', 'tools', 'export', 
-              '--input-path', f'{results_folder_name}/qiime2/taxonomy-classification.qza', 
+              '--input-path', f'{results_folder_name}/qiime2/taxonomy-classification.qza',
               '--output-path', f'{results_folder_name}/exports']
     subprocess.call(' '.join(args_3), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
@@ -234,27 +233,34 @@ def taxonomy_qiime2(results_folder_name, classifier_path, threads):
 
 def export_qiime2(results_folder_name):
     args_1 = ['qiime', 'tools', 'export', 
-              '--input-path', f'{results_folder_name}/qiime2/otu-seqs-filtered.qza', 
+              '--input-path', f'{results_folder_name}/qiime2/rep-seqs-dereplicated-nonchimeric.qza',
               '--output-path', f'{results_folder_name}/exports']
     subprocess.call(' '.join(args_1), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_1) + '\n\n')
 
     args_2 = ['qiime', 'tools', 'export', 
-              '--input-path', f'{results_folder_name}/qiime2/otu-table-filtered.qza', 
+              '--input-path', f'{results_folder_name}/qiime2/table-dereplicated-nonchimeric.qza',
               '--output-path', f'{results_folder_name}/exports']
     subprocess.call(' '.join(args_2), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_2) + '\n\n')
 
-def run_vsearch(results_folder_name):
-
-
+def run_vsearch(results_folder_name, threads, perc_identity):
+    os.makedirs(f'{results_folder_name}/vsearch')
+    args_1 = f'vsearch --derep_fulllength {results_folder_name}/exports/dna-sequences.fasta --sizein --sizeout --fasta_width 0 --uc {results_folder_name}/vsearch/merged.derep.uc --output {results_folder_name}/vsearch/merged.derep.fasta'
+    subprocess.call(' '.join(args_1), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_1) + '\n\n')
+    
+    args_2 = f'vsearch --cluster_size {results_folder_name}/vsearch/merged.derep.fasta --threads {str(threads)} --id {str(perc_identity)} --strand both --sizein --sizeout --fasta_width 0 --uc {results_folder_name}/vsearch/otu_clusters.uc --centroids {results_folder_name}/vsearch/otu_centroids.fasta'
+    subprocess.call(' '.join(args_2), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_2) + '\n\n')
 
 ################################################################################
 #################             MAIN             #################################
 ################################################################################
-
 def main():
     # Create an argument parser
     parser = argparse.ArgumentParser(description="List files in a folder")
@@ -306,9 +312,8 @@ def main():
         chimera_removal_qiime2(out_folder)
         taxonomy_qiime2(out_folder, args.classifier, args.threads)
         export_qiime2(out_folder)
-        run_vsearch(out_folder, args.threads)
+        run_vsearch(out_folder, args.threads, args.perc_identity)
        
-        
 
 if __name__ == "__main__":
     main()
