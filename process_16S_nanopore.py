@@ -10,7 +10,6 @@ import glob
 ################################################################################
 
 # Preprocessing part
-
 def create_result_folder(results_folder_name):
     """
     Creates a folder results, if the folder already exists, does not overwrites it.
