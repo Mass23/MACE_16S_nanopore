@@ -9,6 +9,9 @@ import glob
 #################           FUNCTIONS           ################################
 ################################################################################
 
+def add_to_log(text):
+    with open(f'{results_folder_name}/log.txt', 'w') as log:
+        log.write(text + '\n\n')
 # Preprocessing part
 def create_result_folder(results_folder_name):
     """
@@ -17,16 +20,14 @@ def create_result_folder(results_folder_name):
     if not os.path.exists(results_folder_name):
         os.makedirs(results_folder_name)
     
-    with open(f'{results_folder_name}/log.txt', 'w') as log:
-        log.write(f"Log file for the run {results_folder_name}, time and date: {datetime.datetime.now().strftime('%I:%M%p on %B %d, %Y')}" + '\n\n')
+    add_to_log(f"Log file for the run {results_folder_name}, time and date: {datetime.datetime.now().strftime('%I:%M%p on %B %d, %Y')}" + '\n\n')
 
 def print_env_summary(results_folder_name):
     """
     Print the conda environment list (packages and softwares with version numbers).
     """
     subprocess.call(f'conda list > {results_folder_name}/list_conda.txt', shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-        log.write('Creating the list_conda.txt file that summarises the conda env.' + '\n\n')
+    add_to_log('Creating the list_conda.txt file that summarises the conda env.' + '\n\n')
 
 def load_metadata(metadata_path, extension):
     """
@@ -108,11 +109,9 @@ def concatenate_files(folder_path, metadata, samples, results_folder_name):
         new_samples.append(new_sample)
     return(new_samples)
 
-
 # Reads preprocessing part
 def run_porechop(samples, threads, results_folder_name):
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-        log.write(f'Running porechop...' + '\n\n')
+    add_to_log(f'Running porechop...')
 
     for sample in samples:
         reads_in = f'{results_folder_name}/raw_data/{sample}.fastq.gz'
@@ -121,12 +120,10 @@ def run_porechop(samples, threads, results_folder_name):
                 reads_out]
         subprocess.call(' '.join(args), shell = True)
 
-        with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args) + '\n\n')
+        add_to_log(' '.join(args))
 
 def run_chopper(samples, threads, results_folder_name):
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-        log.write(f'Running chopper...' + '\n\n')
+    add_to_log(f'Running chopper...')
 
     for sample in samples:
         reads_in = f'{results_folder_name}/raw_data/{sample}_porechopped.fastq.gz'
@@ -138,125 +135,67 @@ def run_chopper(samples, threads, results_folder_name):
         subprocess.call(' '.join(args), shell = True)
         subprocess.call(f'rm {reads_in}', shell = True)
 
-        with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args) + '\n\n')
+        add_to_log(' '.join(args) + '\n\n')
+
+# vsearch part
+def run_vsearch(results_folder_name, samples, threads, perc_identity):
+    os.makedirs(f'{results_folder_name}/vsearch')
+    os.makedirs(f'{results_folder_name}/vsearch/drep_data')
+
+    for sample in samples:
+        args_1 = f'vsearch --derep_fulllength $s.fasta --strand both --output {results_folder_name}/vsearch/drep_data/{sample}_derep.fasta --sizeout --uc {results_folder_name}/vsearch/drep_data/{sample}s.derep.uc --relabel {results_folder_name}/vsearch/drep_data/{sample}s. --fasta_width 0'
+        subprocess.call(args_1, shell=True)
+        add_to_log(args_1)
+
+    args_2 = f'cat {results_folder_name}/vsearch/drep_data/*derep.fasta > {results_folder_name}/vsearch/drep_data/all_derep.fasta'
+    subprocess.call(args_2, shell=True)
+    add_to_log(args_2)
+'
+    args_3 = f'vsearch --derep_fulllength {results_folder_name}/vsearch/drep_data/all_derep.fasta --sizein --sizeout --fasta_width 0 --uc {results_folder_name}/vsearch/merged.derep.uc --output {results_folder_name}/vsearch/merged.derep.fasta'
+    subprocess.call(args_3, shell = True)
+    add_to_log(args_3)
+    
+    args_4 = f'vsearch --cluster_size {results_folder_name}/vsearch/merged.derep.fasta --threads {str(threads)} --id {str(perc_identity)} --strand both --sizein --sizeout --fasta_width 0 --uc {results_folder_name}/vsearch/otu_clusters.uc --centroids {results_folder_name}/vsearch/otu_centroids.fasta'
+    subprocess.call(' '.join(args_4), shell = True)
+    add_to_log(args_4)
 
 # Qiime 2 part
-def create_manifest(results_folder_name):
-    os.makedirs(f'{results_folder_name}/qiime2')
-    full_path = os.getcwd()
-    manifest = pd.DataFrame(columns=['sample-id', 'absolute-filepath'])
-    
-    sample_files = glob.glob(f'{results_folder_name}/raw_data/*_chopped.fastq.gz')
-    samples = [sample.split('/')[2].replace('_chopped.fastq.gz','') for sample in sample_files]
-    print(samples)
-    for sample in samples:
-        manifest.loc[len(manifest.index)] = [sample, f'{full_path}/{results_folder_name}/raw_data/{sample}_chopped.fastq.gz'] 
-    manifest.to_csv(f'{results_folder_name}/qiime2/qiime2_manifest.tsv', sep='\t', index=False) 
+#def create_manifest(results_folder_name):
+#    os.makedirs(f'{results_folder_name}/qiime2')
+#    full_path = os.getcwd()
+#    manifest = pd.DataFrame(columns=['sample-id', 'absolute-filepath'])
+#    
+#    sample_files = glob.glob(f'{results_folder_name}/raw_data/*_chopped.fastq.gz')
+#    samples = [sample.split('/')[2].replace('_chopped.fastq.gz','') for sample in sample_files]
+#    print(samples)
+#    for sample in samples:
+#        manifest.loc[len(manifest.index)] = [sample, f'{full_path}/{results_folder_name}/raw_data/{sample}_chopped.fastq.gz'] 
+#    manifest.to_csv(f'{results_folder_name}/qiime2/qiime2_manifest.tsv', sep='\t', index=False) 
+#
+#    with open(f'{results_folder_name}/log.txt', 'a') as log:
+#        log.write('Qiime2 manifest created...' + '\n\n')
 
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-        log.write('Qiime2 manifest created...' + '\n\n')
-
+# taxonomy part
 def import_qiime2(results_folder_name):
-    """
-    Import the data into qiime with a manifest, print the visualisation for quality assessement.
-    """
-    args_1 = ['qiime tools import', '--type', "'SampleData[SequencesWithQuality]'",
-            '--input-path', f'{results_folder_name}/qiime2/qiime2_manifest.tsv', 
-            '--output-path' , f'{results_folder_name}/qiime2/preprocessed_reads.qza',
-            '--input-format', 'SingleEndFastqManifestPhred33V2']
-    subprocess.call(' '.join(args_1), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_1) + '\n\n')
-
-    args_2 = ['qiime demux summarize',
-             '--i-data', f'{results_folder_name}/qiime2/preprocessed_reads.qza',
-             '--o-visualization', f'{results_folder_name}/qiime2/preprocessed_reads.qzv']
-    subprocess.call(' '.join(args_2), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_2) + '\n\n')
-
-def dereplicate_qiime2(results_folder_name):
-    """
-    Dereplicate sequences and do chimera removal steps using uchime denovo.
-    """
-    args_1 = ['qiime vsearch dereplicate-sequences',
-              '--i-sequences', f'{results_folder_name}/qiime2/preprocessed_reads.qza',
-              '--o-dereplicated-table', f'{results_folder_name}/qiime2/table-dereplicated.qza', 
-              '--o-dereplicated-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza']
-    subprocess.call(' '.join(args_1), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_1) + '\n\n')
-
-def chimera_removal_qiime2(results_folder_name):
-    args_6 = ['qiime vsearch uchime-denovo',
-              '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
-              '--i-sequences',  f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
-              '--output-dir', f'{results_folder_name}/qiime2/uchime-dn-out']
-    subprocess.call(' '.join(args_6), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_6) + '\n\n')
+    os.makedirs(f'{results_folder_name}/qiime2')
     
-    args_7 = ['qiime feature-table filter-features',
-              '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
-              '--m-metadata-file', f'{results_folder_name}/qiime2/uchime-dn-out/chimeras.qza',
-              '--p-exclude-ids',
-              '--o-filtered-table', f'{results_folder_name}/qiime2/table-dereplicated-nonchimeric.qza']
-    subprocess.call(' '.join(args_7), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_7) + '\n\n')
-    
-    args_8 = ['qiime feature-table filter-seqs',
-              '--i-data', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
-              '--m-metadata-file', f'{results_folder_name}/qiime2/uchime-dn-out/chimeras.qza',
-              '--p-exclude-ids',
-              '--o-filtered-data', f'{results_folder_name}/qiime2/rep-seqs-dereplicated-nonchimeric.qza']
-    subprocess.call(' '.join(args_8), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_8) + '\n\n')
-
+    args_1 = f"qiime tools import –input-path {results_folder_name}/vsearch/merged.derep.fasta –output-path {results_folder_name}/qiime2/sequences.qza –type 'FeatureData[Sequence]'"
+    subprocess.call(args_1, shell = True)
+    add_to_log(' '.join(args_1))
+        
 def taxonomy_qiime2(results_folder_name, classifier_path, threads):
     args_2 = ['qiime feature-classifier classify-sklearn','--p-n-jobs', threads,
-              '--i-reads', f'{results_folder_name}/qiime2/rep-seqs-dereplicated-nonchimeric.qza',
+              '--i-reads', f'{results_folder_name}/qiime2/sequences.qza',
               '--i-classifier', classifier_path,
               '--o-classification', f'{results_folder_name}/qiime2/taxonomy-classification.qza']
     subprocess.call(' '.join(args_2), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_2) + '\n\n')
+    add_to_log(' '.join(args_2))
 
     args_3 = ['qiime', 'tools', 'export', 
               '--input-path', f'{results_folder_name}/qiime2/taxonomy-classification.qza',
               '--output-path', f'{results_folder_name}/exports']
     subprocess.call(' '.join(args_3), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_3) + '\n\n')
-
-def export_qiime2(results_folder_name):
-    args_1 = ['qiime', 'tools', 'export', 
-              '--input-path', f'{results_folder_name}/qiime2/rep-seqs-dereplicated-nonchimeric.qza',
-              '--output-path', f'{results_folder_name}/exports']
-    subprocess.call(' '.join(args_1), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_1) + '\n\n')
-
-    args_2 = ['qiime', 'tools', 'export', 
-              '--input-path', f'{results_folder_name}/qiime2/table-dereplicated-nonchimeric.qza',
-              '--output-path', f'{results_folder_name}/exports']
-    subprocess.call(' '.join(args_2), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_2) + '\n\n')
-
-def run_vsearch(results_folder_name, threads, perc_identity):
-    os.makedirs(f'{results_folder_name}/vsearch')
-    args_1 = f'vsearch --derep_fulllength {results_folder_name}/exports/dna-sequences.fasta --sizein --sizeout --fasta_width 0 --uc {results_folder_name}/vsearch/merged.derep.uc --output {results_folder_name}/vsearch/merged.derep.fasta'
-    subprocess.call(' '.join(args_1), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_1) + '\n\n')
-    
-    args_2 = f'vsearch --cluster_size {results_folder_name}/vsearch/merged.derep.fasta --threads {str(threads)} --id {str(perc_identity)} --strand both --sizein --sizeout --fasta_width 0 --uc {results_folder_name}/vsearch/otu_clusters.uc --centroids {results_folder_name}/vsearch/otu_centroids.fasta'
-    subprocess.call(' '.join(args_2), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_2) + '\n\n')
+    add_to_log(' '.join(args_3))
 
 ################################################################################
 #################             MAIN             #################################
@@ -306,14 +245,10 @@ def main():
 
     if args.skipqiime2 is False:
         # Create the Qiime manifest, run qiime analysis
-        create_manifest(out_folder)
-        import_qiime2(out_folder)
-        dereplicate_qiime2(out_folder)
-        chimera_removal_qiime2(out_folder)
-        taxonomy_qiime2(out_folder, args.classifier, args.threads)
-        export_qiime2(out_folder)
         run_vsearch(out_folder, args.threads, args.perc_identity)
-       
-
+        import_qiime2(out_folder)
+        taxonomy_qiime2(out_folder, args.classifier, args.threads)
+        
+        
 if __name__ == "__main__":
     main()
