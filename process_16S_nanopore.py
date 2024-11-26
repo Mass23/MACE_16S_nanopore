@@ -176,26 +176,20 @@ def run_vsearch(results_folder_name, samples, threads, perc_identity):
 #        log.write('Qiime2 manifest created...' + '\n\n')
 
 # taxonomy part
-def import_qiime2(results_folder_name):
+def taxonomy_qiime2(results_folder_name, classifier_path, threads):
     os.makedirs(f'{results_folder_name}/qiime2')
     
     args_1 = f"qiime tools import –input-path {results_folder_name}/vsearch/merged.derep.fasta –output-path {results_folder_name}/qiime2/sequences.qza –type 'FeatureData[Sequence]'"
     subprocess.call(args_1, shell = True)
-    add_to_log(' '.join(args_1))
-        
-def taxonomy_qiime2(results_folder_name, classifier_path, threads):
-    args_2 = ['qiime feature-classifier classify-sklearn','--p-n-jobs', threads,
-              '--i-reads', f'{results_folder_name}/qiime2/sequences.qza',
-              '--i-classifier', classifier_path,
-              '--o-classification', f'{results_folder_name}/qiime2/taxonomy-classification.qza']
-    subprocess.call(' '.join(args_2), shell = True)
-    add_to_log(' '.join(args_2))
+    add_to_log(args_1)
+    
+    args_2 = f'qiime feature-classifier classify-sklearn --p-n-jobs {threads} --i-reads {results_folder_name}/qiime2/sequences.qza --i-classifier {classifier_path} --o-classification {results_folder_name}/qiime2/taxonomy-classification.qza'
+    subprocess.call(args_2, shell = True)
+    add_to_log(args_2)
 
-    args_3 = ['qiime', 'tools', 'export', 
-              '--input-path', f'{results_folder_name}/qiime2/taxonomy-classification.qza',
-              '--output-path', f'{results_folder_name}/exports']
-    subprocess.call(' '.join(args_3), shell = True)
-    add_to_log(' '.join(args_3))
+    args_3 = f'qiime tools export --input-path {results_folder_name}/qiime2/taxonomy-classification.qza --output-path {results_folder_name}/exports'
+    subprocess.call(args_3, shell = True)
+    add_to_log(args_3)
 
 ################################################################################
 #################             MAIN             #################################
