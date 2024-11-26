@@ -143,10 +143,7 @@ def run_chopper(samples, threads, results_folder_name):
         with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args) + '\n\n')
 
-
-
 # Qiime 2 part
-
 def create_manifest(results_folder_name):
     os.makedirs(f'{results_folder_name}/qiime2')
     full_path = os.getcwd()
@@ -181,7 +178,7 @@ def import_qiime2(results_folder_name):
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_2) + '\n\n')
 
-def dereplicate_qiime2(results_folder_name, threads, perc_identity):
+def dereplicate_qiime2(results_folder_name):
     """
     Dereplicate sequences and do chimera removal steps using uchime denovo.
     """
@@ -193,78 +190,48 @@ def dereplicate_qiime2(results_folder_name, threads, perc_identity):
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_1) + '\n\n')
 
-    args_2 = ['qiime vsearch cluster-features-de-novo',
-              '--p-strand', 'both',
+def chimera_removal_qiime2(results_folder_name):
+    args_6 = ['qiime vsearch uchime-denovo',
               '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
-              '--i-sequences', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
-              '--p-perc-identity', perc_identity, '--p-threads', threads,
-              '--o-clustered-table', f'{results_folder_name}/qiime2/otu-table.qza',
-              '--o-clustered-sequences', f'{results_folder_name}/qiime2/otu-seqs.qza']
-    subprocess.call(' '.join(args_2), shell = True)
+              '--i-sequences',  f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
+              '--output-dir', f'{results_folder_name}/qiime2/uchime-dn-out']
+    subprocess.call(' '.join(args_6), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_2) + '\n\n')
-
-    args_3 = ['qiime feature-table filter-features',
-              '--i-table', f'{results_folder_name}/qiime2/otu-table.qza',
-              '--p-min-frequency', '2', 
-              '--o-filtered-table', f'{results_folder_name}/qiime2/otu-table-filtered.qza']
-    subprocess.call(' '.join(args_3), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_3) + '\n\n')
-
-    args_4 = ['qiime feature-table filter-seqs',
-              '--i-data', f'{results_folder_name}/qiime2/otu-seqs.qza',
-              '--i-table', f'{results_folder_name}/qiime2/otu-table-filtered.qza',
-              '--o-filtered-data', f'{results_folder_name}/qiime2/otu-seqs-filtered.qza']
-    subprocess.call(' '.join(args_4), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_4) + '\n\n')
-
-    args_5 = f'qiime feature-table summarize --i-table {results_folder_name}/qiime2/otu-table-filtered.qza --o-visualization {results_folder_name}/qiime2/otu-table-filtered.qzv'
-    subprocess.call(args_5, shell = True)
+            log.write(' '.join(args_6) + '\n\n')
     
-    # if one day chimera detection is needed
-    #args_2 = ['qiime vsearch uchime-denovo',
-    #          '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza',
-    #          '--i-sequences',  f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
-    #          '--output-dir', f'{results_folder_name}/qiime2/uchime-dn-out']
-    #subprocess.call(' '.join(args_2), shell = True)
-    #with open(f'{results_folder_name}/log.txt', 'a') as log:
-    #        log.write(' '.join(args_2) + '\n\n')
-    #
-    #args_3 = ['qiime feature-table filter-features',
-    #          '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza', 
-    #          '--m-metadata-file', f'{results_folder_name}/qiime2/uchime-dn-out/chimeras.qza',
-    #          '--p-exclude-ids',
-    #          '--o-filtered-table', f'{results_folder_name}/qiime2/table-dereplicated-nonchimeric.qza']
-    #subprocess.call(' '.join(args_3), shell = True)
-    #with open(f'{results_folder_name}/log.txt', 'a') as log:
-    #        log.write(' '.join(args_3) + '\n\n')
-    #
-    #args_4 = ['qiime feature-table filter-seqs',
-    #          '--i-data', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
-    #          '--m-metadata-file', f'{results_folder_name}/qiime2/uchime-dn-out/chimeras.qza',
-    #          '--p-exclude-ids',
-    #          '--o-filtered-data', f'{results_folder_name}/qiime2/rep-seqs-dereplicated-nonchimeric.qza']
-    #subprocess.call(' '.join(args_4), shell = True)
-    #with open(f'{results_folder_name}/log.txt', 'a') as log:
-    #        log.write(' '.join(args_4) + '\n\n')
+    args_7 = ['qiime feature-table filter-features',
+              '--i-table', f'{results_folder_name}/qiime2/table-dereplicated.qza', 
+              '--m-metadata-file', f'{results_folder_name}/qiime2/uchime-dn-out/chimeras.qza',
+              '--p-exclude-ids',
+              '--o-filtered-table', f'{results_folder_name}/qiime2/table-dereplicated-nonchimeric.qza']
+    subprocess.call(' '.join(args_7), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_7) + '\n\n')
+    
+    args_8 = ['qiime feature-table filter-seqs',
+              '--i-data', f'{results_folder_name}/qiime2/rep-seqs-dereplicated.qza',
+              '--m-metadata-file', f'{results_folder_name}/qiime2/uchime-dn-out/chimeras.qza',
+              '--p-exclude-ids',
+              '--o-filtered-data', f'{results_folder_name}/qiime2/rep-seqs-dereplicated-nonchimeric.qza']
+    subprocess.call(' '.join(args_8), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_8) + '\n\n')
 
-def taxonomy_qiime2(results_folder_name, threads):
-    if not os.path.exists(f'{results_folder_name}/qiime2/2022.10.backbone.full-length.fna.qza'):
-        args_1 = ['wget', '-P', f'{results_folder_name}/qiime2/',
-        'http://ftp.microbio.me/greengenes_release/current/sklearn-1.4.2-compatible-nb-classifiers/2022.10.backbone.full-length.nb.sklearn-1.4.2.qza']
-        subprocess.call(' '.join(args_1), shell = True)
-        with open(f'{results_folder_name}/log.txt', 'a') as log:
-                log.write(' '.join(args_1) + '\n\n')
-
+def taxonomy_qiime2(results_folder_name, classifier_path, threads):
     args_2 = ['qiime feature-classifier classify-sklearn','--p-n-jobs', threads,
               '--i-reads', f'{results_folder_name}/qiime2/otu-seqs-filtered.qza', 
-              '--i-classifier', f'{results_folder_name}/qiime2/2022.10.backbone.full-length.nb.sklearn-1.4.2.qza',
+              '--i-classifier', classifier_path,
               '--o-classification', f'{results_folder_name}/qiime2/taxonomy-classification.qza']
     subprocess.call(' '.join(args_2), shell = True)
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_2) + '\n\n')
+
+    args_3 = ['qiime', 'tools', 'export', 
+              '--input-path', f'{results_folder_name}/qiime2/taxonomy-classification.qza', 
+              '--output-path', f'{results_folder_name}/exports']
+    subprocess.call(' '.join(args_3), shell = True)
+    with open(f'{results_folder_name}/log.txt', 'a') as log:
+            log.write(' '.join(args_3) + '\n\n')
 
 def export_qiime2(results_folder_name):
     args_1 = ['qiime', 'tools', 'export', 
@@ -281,12 +248,9 @@ def export_qiime2(results_folder_name):
     with open(f'{results_folder_name}/log.txt', 'a') as log:
             log.write(' '.join(args_2) + '\n\n')
 
-    args_3 = ['qiime', 'tools', 'export', 
-              '--input-path', f'{results_folder_name}/qiime2/taxonomy-classification.qza', 
-              '--output-path', f'{results_folder_name}/exports']
-    subprocess.call(' '.join(args_3), shell = True)
-    with open(f'{results_folder_name}/log.txt', 'a') as log:
-            log.write(' '.join(args_3) + '\n\n')
+def run_vsearch(results_folder_name):
+
+
 
 ################################################################################
 #################             MAIN             #################################
@@ -298,19 +262,21 @@ def main():
 
     # Add the folder path argument
     parser.add_argument("-f", "--folder", type=str,
-                        help="Path to the folder as a string", required=True)
+                        help="Path to the folder as a string.", required=True)
     parser.add_argument("-n", "--name", type=str,
-                        help="Name of the results folder (_results will be added at the end)", required=True)
+                        help="Name of the results folder (_results will be added at the end).", required=True)
     parser.add_argument("-m", "--metadata_file", type=str,
                         help="Path to the metadata tsv file", required=True)
     parser.add_argument("-t", "--threads", type=str,
-                        help="Number of threads to use for multiprocessing-compatible tasks", required=True)
+                        help="Number of threads to use for multiprocessing-compatible tasks.", required=True)
+    parser.add_argument("-c", "--classifier", type=str,
+                        help="Path of the classifier to use.", required=True)
     parser.add_argument("--skippreprocessing", action='store_true',
-                        help="To add if you want to skip preprocessing")
+                        help="To add if you want to skip preprocessing.")
     parser.add_argument("--skipqiime2", action='store_true',
-                        help="To add if you want to skip the qiime2 part (only preprocessing)")
+                        help="To add if you want to skip the qiime2 part (only preprocessing).")
     parser.add_argument("--perc_identity", action='store_true', default='0.97',
-                        help="To add if you want to skip the qiime2 part (only preprocessing)")
+                        help="To add if you want to perform OTU clustering at a different threshold, default is 97%.")
 
 
     # Parse arguments
@@ -337,9 +303,13 @@ def main():
         # Create the Qiime manifest, run qiime analysis
         create_manifest(out_folder)
         import_qiime2(out_folder)
-        dereplicate_qiime2(out_folder, args.threads, args.perc_identity)
-        taxonomy_qiime2(out_folder, args.threads)
+        dereplicate_qiime2(out_folder)
+        chimera_removal_qiime2(out_folder)
+        taxonomy_qiime2(out_folder, args.classifier, args.threads)
         export_qiime2(out_folder)
+        run_vsearch(out_folder, args.threads)
+       
+        
 
 if __name__ == "__main__":
     main()
