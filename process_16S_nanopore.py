@@ -8,10 +8,10 @@ import glob
 ################################################################################
 #################           FUNCTIONS           ################################
 ################################################################################
-
 def add_to_log(text):
     with open(f'{results_folder_name}/log.txt', 'w') as log:
         log.write(text + '\n\n')
+        
 # Preprocessing part
 def create_result_folder(results_folder_name):
     """
