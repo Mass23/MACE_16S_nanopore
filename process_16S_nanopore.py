@@ -143,7 +143,7 @@ def run_vsearch(results_folder_name, samples, threads, perc_identity):
     args_2 = f'cat {results_folder_name}/vsearch/drep_data/*derep.fasta > {results_folder_name}/vsearch/drep_data/all_derep.fasta'
     subprocess.call(args_2, shell=True)
     add_to_log(args_2)
-'
+
     args_3 = f'vsearch --derep_fulllength {results_folder_name}/vsearch/drep_data/all_derep.fasta --sizein --sizeout --fasta_width 0 --uc {results_folder_name}/vsearch/merged.derep.uc --output {results_folder_name}/vsearch/merged.derep.fasta'
     subprocess.call(args_3, shell = True)
     add_to_log(args_3)
