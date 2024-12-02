@@ -43,7 +43,7 @@ def load_metadata(metadata_path, extension):
         print('Only tsv or csv files are accepted!!!')
     return(metadata)
 
-def list_subfolders(folder_path):
+def list_fastq_files(folder_path):
     """
     Lists all folders in the given folder (= samples fastq files).
     """
@@ -54,12 +54,11 @@ def list_subfolders(folder_path):
             return
 
         # List all entries in the directory
-        entries = os.listdir(folder_path)
+        fastq_files = glob.glob(f'{folder_path}/*.fastq.gz')
 
         # Filter out files, keep only directories
-        subfolders = [entry for entry in entries if os.path.isdir(os.path.join(folder_path, entry))]
-        filtered_subfolders = [subfolder for subfolder in subfolders if subfolder != 'unclassified']
-        return(filtered_subfolders)
+        filtered_fastq_files = [fastq for fastq in fastq_files if fastq != 'unclassified']
+        return(filtered_fastq_files)
 
     except Exception as e:
         print(f"An error occurred: {e}")
