@@ -102,7 +102,7 @@ def concatenate_files(folder_path, metadata, samples, results_folder_name):
     os.makedirs('%s/raw_data' % (results_folder_name))
     new_samples = []
     for sample in samples:
-        new_sample = metadata.loc[metadata['Barcode'] == sample, '#SampleID'].values[0]
+        new_sample = metadata.loc[metadata['Barcode'] == sample, 'Sample'].values[0]
         new_path = f'{results_folder_name}/raw_data/{new_sample}.fastq.gz'
         args = f'cat {folder_path}/{sample}.fastq.gz > {new_path}'
         subprocess.call(args, shell = True)
