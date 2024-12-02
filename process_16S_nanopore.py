@@ -175,10 +175,19 @@ def taxonomy_qiime2(results_folder_name, classifier_path, threads):
     args_1 = f"qiime tools import –input-path {results_folder_name}/vsearch/merged.derep.fasta –output-path {results_folder_name}/qiime2/sequences.qza –type 'FeatureData[Sequence]'"
     subprocess.call(args_1, shell = True)
     add_to_log(args_1)
-    
-    args_2 = f'qiime feature-classifier classify-sklearn --p-n-jobs {threads} --i-reads {results_folder_name}/qiime2/sequences.qza --i-classifier {classifier_path} --o-classification {results_folder_name}/qiime2/taxonomy-classification.qza'
-    subprocess.call(args_2, shell = True)
-    add_to_log(args_2)
+
+    if ',' in classifier_path:
+        classifiers = ','.split(classifier_path)
+        for classifier in classifiers:
+            classifier_name = classifier.split('/')[-1].replace('.qza','')
+            args_2 = f'qiime feature-classifier classify-sklearn --p-n-jobs {threads} --i-reads {results_folder_name}/qiime2/sequences.qza --i-classifier {classifier} --o-classification {results_folder_name}/qiime2/taxonomy-classification-{classifier_name}.qza'
+            subprocess.call(args_2, shell = True)
+            add_to_log(args_2)
+
+    else:
+        args_2 = f'qiime feature-classifier classify-sklearn --p-n-jobs {threads} --i-reads {results_folder_name}/qiime2/sequences.qza --i-classifier {classifier_path} --o-classification {results_folder_name}/qiime2/taxonomy-classification.qza'
+        subprocess.call(args_2, shell = True)
+        add_to_log(args_2)
 
     args_3 = f'qiime tools export --input-path {results_folder_name}/qiime2/taxonomy-classification.qza --output-path {results_folder_name}/exports'
     subprocess.call(args_3, shell = True)
