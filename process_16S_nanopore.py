@@ -71,7 +71,7 @@ def list_files(folder_path):
     samples = [file.replace('.fastq.gz','').split('/')[-1] for file in files]
     samples = [file.split('_')[-1] for file in files]
     filtered_samples = [sample for sample in samples if not sample.contains('unclassified')]
-    return(samples)
+    return(filtered_samples)
 
 def check_metadata_samples(metadata, samples, results_folder_name):
     """
