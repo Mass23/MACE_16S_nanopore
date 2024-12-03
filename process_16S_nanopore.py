@@ -105,7 +105,7 @@ def concatenate_files(folder_path, metadata, samples, results_folder_name):
     for sample in samples:
         new_sample = metadata.loc[metadata['Barcode'] == sample, 'Sample'].values[0]
         new_path = f'{results_folder_name}/raw_data/{new_sample}.fastq.gz'
-        args = f'cat {folder_path}/{sample}.fastq.gz > {new_path}'
+        args = f'cat {folder_path}/*{sample}.fastq.gz > {new_path}'
         subprocess.call(args, shell = True)
         new_samples.append(new_sample)
     return(new_samples)
