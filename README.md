@@ -26,9 +26,9 @@ rename s/SUFFIX_// S*.fastq
 gzip *.fastq
 ```
     
-  e. Run the pipeline by updating the "example.sh" file, and running it as a bash script: `bash example.sh` (don't forget to create a screen because it may run for a while). The available classifiers can be found in `/data/databases/16s_classifiers`.
+  e. Run the pipeline by updating the "example.sh" file, and running it as a bash script: `bash example.sh` (don't forget to create a screen because it may run for a while). The available classifiers can be found in `/data/databases/16s_classifiers`. Please keep the 16s output in the `/data/16s/processed_data` folder, keeping the dataset's name.
   
-  example run: `python3 process_16S_nanopore.py -f /data/alpine_soil/ -n alpine_soil -m metadata.tsv -c classifier1,classifier2 -t 24` from within the repository, -f is the data folder (reads), -n is the name for the output, metadata.tsv is the metadata file (look at the one in the repo for guidance, needs the Barcode and #SampleID columns), -t is the numbers of threads to use.
+  example run: `python3 process_16S_nanopore.py -f /data/16s/alpine_soil/ -n /data/16s/processed_data/alpine_soil -m /data/16s/alpine_soil/metadata.tsv -c classifier1,classifier2 -t 24`, -f is the data folder (reads), -n is the name for the output, metadata.tsv is the metadata file (look at the one in the repo for guidance, needs the Barcode and #SampleID columns), -t is the numbers of threads to use. Run it from wherever you want, but be sure to use absolute paths for both the reads data directory, and the output directory name!
 
 # 2. Description
 
