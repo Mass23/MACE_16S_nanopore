@@ -1,2 +1,2 @@
-python3 process_16S_nanopore.py -f /data/ap_snow_16S_2023/helicopter_2023_pt1/dorado_output/ -n helicopter_2023_part1 -m barcodes_hel2023_pt1.tsv -t 32 --skipqiime2 #--skippreprocessing
+python3 process_16S_nanopore.py -f /data/16s/test_set/fastq_files/ -n /data/16s/test_set/test_run -m /data/16s/test_set/meta_test.csv -t 32 -c /data/databases/16S_classifiers/nov_2024/silva/silva-138-99-nb-classifier.qza --skippreprocessing ##--skipqiime2 #--skippreprocessing
 

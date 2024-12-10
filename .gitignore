@@ -1,4 +1,6 @@
 data/
+old/
+scripts/
 alpine_soil/
 alpine_soil_results/
 alpine_test_results/

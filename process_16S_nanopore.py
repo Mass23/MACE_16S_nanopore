@@ -68,10 +68,16 @@ def list_files(folder_path):
     List the fastq.gz files in the specifiec raw reads directory.
     """
     files = glob.glob(f'{folder_path}/*.fastq.gz')
-    samples = [file.replace('.fastq.gz','').split('/')[-1] for file in files]
-    samples = [file.split('_')[-1] for file in files]
+    samples = [file.replace('.fastq.gz','') for file in files]
+    samples = [os.path.basename(file) for file in samples]
+    samples = [file.split('_')[-1] for file in samples]
     filtered_samples = [sample for sample in samples if not 'unclassified' in sample]
     return(filtered_samples)
+
+def list_samples(output_path):
+    files = glob.glob(f'{output_path}/raw_data/*_chopped.fastq.gz')
+    samples = [os.path.basename(file).replace('_chopped.fastq.gz','') for file in files]
+    return(samples)
 
 def check_metadata_samples(metadata, samples, results_folder_name):
     """
@@ -137,7 +143,13 @@ def run_vsearch(results_folder_name, samples, threads, perc_identity):
     os.makedirs(f'{results_folder_name}/vsearch/drep_data')
 
     for sample in samples:
-        args_1 = f'vsearch --derep_fulllength $s.fasta --strand both --output {results_folder_name}/vsearch/drep_data/{sample}_derep.fasta --sizeout --uc {results_folder_name}/vsearch/drep_data/{sample}s.derep.uc --relabel {results_folder_name}/vsearch/drep_data/{sample}s. --fasta_width 0'
+        fastq_in = f'{results_folder_name}/raw_data/{sample}_chopped.fastq.gz'
+        fasta_out = f'{results_folder_name}/vsearch/drep_data/{sample}_raw.fasta'
+        copy_args = f'seqtk seq -a {fastq_in} > {fasta_out}'
+        subprocess.call(copy_args, shell = True)
+        add_to_log(results_folder_name, copy_args)
+
+        args_1 = f'vsearch --derep_fulllength {fasta_out} --strand both --output {results_folder_name}/vsearch/drep_data/{sample}_derep.fasta --sizeout --uc {results_folder_name}/vsearch/drep_data/{sample}s.derep.uc --relabel {sample}.s --fasta_width 0'
         subprocess.call(args_1, shell=True)
         add_to_log(results_folder_name, args_1)
 
@@ -145,12 +157,12 @@ def run_vsearch(results_folder_name, samples, threads, perc_identity):
     subprocess.call(args_2, shell=True)
     add_to_log(results_folder_name, args_2)
 
-    args_3 = f'vsearch --derep_fulllength {results_folder_name}/vsearch/drep_data/all_derep.fasta --sizein --sizeout --fasta_width 0 --uc {results_folder_name}/vsearch/merged.derep.uc --output {results_folder_name}/vsearch/merged.derep.fasta'
-    subprocess.call(args_3, shell = True)
-    add_to_log(results_folder_name, args_3)
+    #args_3 = f'vsearch --derep_fulllength {results_folder_name}/vsearch/drep_data/all_derep.fasta --sizein --sizeout --fasta_width 0 --uc {results_folder_name}/vsearch/merged.derep.uc --output {results_folder_name}/vsearch/merged.derep.fasta'
+    #subprocess.call(args_3, shell = True)
+    #add_to_log(results_folder_name, args_3)
     
-    args_4 = f'vsearch --cluster_size {results_folder_name}/vsearch/merged.derep.fasta --threads {str(threads)} --id {str(perc_identity)} --strand both --sizein --sizeout --fasta_width 0 --uc {results_folder_name}/vsearch/otu_clusters.uc --centroids {results_folder_name}/vsearch/otu_centroids.fasta'
-    subprocess.call(' '.join(args_4), shell = True)
+    args_4 = f'vsearch --cluster_size {results_folder_name}/vsearch/drep_data/all_derep.fasta --threads {str(threads)} --id {str(perc_identity)} --strand both --sizein --sizeout --fasta_width 0 --uc {results_folder_name}/vsearch/otu_clusters.uc --centroids {results_folder_name}/vsearch/otu_centroids.fasta  --otutabout {results_folder_name}/vsearch/otu_table.tsv'
+    subprocess.call(args_4, shell = True)
     add_to_log(results_folder_name, args_4)
 
 # Qiime 2 part
@@ -173,7 +185,7 @@ def run_vsearch(results_folder_name, samples, threads, perc_identity):
 def taxonomy_qiime2(results_folder_name, classifier_path, threads):
     os.makedirs(f'{results_folder_name}/qiime2')
     
-    args_1 = f"qiime tools import –input-path {results_folder_name}/vsearch/merged.derep.fasta –output-path {results_folder_name}/qiime2/sequences.qza –type 'FeatureData[Sequence]'"
+    args_1 = f"qiime tools import –-input-path {results_folder_name}/vsearch/merged.derep.fasta –-output-path {results_folder_name}/qiime2/sequences.qza –-type 'FeatureData[Sequence]'"
     subprocess.call(args_1, shell = True)
     add_to_log(results_folder_name, args_1)
 
@@ -185,14 +197,15 @@ def taxonomy_qiime2(results_folder_name, classifier_path, threads):
             subprocess.call(args_2, shell = True)
             add_to_log(results_folder_name, args_2)
 
+            args_3 = f'qiime tools export --input-path {results_folder_name}/qiime2/taxonomy-classification-{classifier_name}.qza --output-path {results_folder_name}/exports/taxonomy-classification-{classifier_name}'
     else:
         args_2 = f'qiime feature-classifier classify-sklearn --p-n-jobs {threads} --i-reads {results_folder_name}/qiime2/sequences.qza --i-classifier {classifier_path} --o-classification {results_folder_name}/qiime2/taxonomy-classification.qza'
         subprocess.call(args_2, shell = True)
         add_to_log(results_folder_name, args_2)
 
-    args_3 = f'qiime tools export --input-path {results_folder_name}/qiime2/taxonomy-classification.qza --output-path {results_folder_name}/exports'
-    subprocess.call(args_3, shell = True)
-    add_to_log(results_folder_name, args_3)
+        args_3 = f'qiime tools export --input-path {results_folder_name}/qiime2/taxonomy-classification.qza --output-path {results_folder_name}/exports'
+        subprocess.call(args_3, shell = True)
+        add_to_log(results_folder_name, args_3)
 
 ################################################################################
 #################             MAIN             #################################
@@ -216,7 +229,7 @@ def main():
                         help="To add if you want to skip preprocessing.")
     parser.add_argument("--skipqiime2", action='store_true',
                         help="To add if you want to skip the qiime2 part (only preprocessing).")
-    parser.add_argument("--perc_identity", action='store_true', default='0.97',
+    parser.add_argument("--perc_identity", type=int, required=False, default='97',
                         help="To add if you want to perform OTU clustering at a different threshold, default is 97%.")
     parser.add_argument("--qual_threshold", action='store_true', default='12',
                         help="To add if you want to change the quality threshold for chopper, default is 12.")
@@ -241,12 +254,17 @@ def main():
         samples_names = concatenate_files(args.folder, metadata, samples_to_process, out_folder)
         run_porechop(samples_names, args.threads, out_folder)
         run_chopper(samples_names, args.threads, out_folder, args.qual_threshold)
+    else:
+        samples_names = list_samples(out_folder)
+        print('Samples in raw_data folder:')
+        print(samples_names)
+
 
     if args.skipqiime2 is False:
         # Create the Qiime manifest, run qiime analysis
-        run_vsearch(out_folder, samples_names, args.threads, args.perc_identity)
+        run_vsearch(out_folder, samples_names, args.threads, args.perc_identity/100)
         #import_qiime2(out_folder)
-        taxonomy_qiime2(out_folder, args.classifier, args.threads)
+        #taxonomy_qiime2(out_folder, args.classifier, args.threads)
         
         
 if __name__ == "__main__":
