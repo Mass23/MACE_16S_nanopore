@@ -11,7 +11,7 @@ import glob
 def add_to_log(results_folder_name, text):
     with open(f'{results_folder_name}/log.txt', 'w') as log:
         log.write(text + '\n\n')
-        
+
 # Preprocessing part
 def create_result_folder(results_folder_name):
     """
@@ -19,7 +19,7 @@ def create_result_folder(results_folder_name):
     """
     if not os.path.exists(results_folder_name):
         os.makedirs(results_folder_name)
-    
+
     add_to_log(results_folder_name, f"Log file for the run {results_folder_name}, time and date: {datetime.datetime.now().strftime('%I:%M%p on %B %d, %Y')}" + '\n\n')
 
 def print_env_summary(results_folder_name):
@@ -101,7 +101,7 @@ def check_metadata_samples(metadata, samples, results_folder_name):
     out_list = [sample for sample in list(metadata_samples) if sample in files_samples]
     return metadata.loc[metadata['Barcode'].isin(out_list)], out_list
 
-def concatenate_files(folder_path, metadata, samples, results_folder_name):
+ef concatenate_files(folder_path, metadata, samples, results_folder_name):
     """
     Takes folder paths, metadata files and samples list and concatenate the data
     for each sample in the list, + renames it to the sample name using metadata.
@@ -160,7 +160,7 @@ def run_vsearch(results_folder_name, samples, threads, perc_identity):
     #args_3 = f'vsearch --derep_fulllength {results_folder_name}/vsearch/drep_data/all_derep.fasta --sizein --sizeout --fasta_width 0 --uc {results_folder_name}/vsearch/merged.derep.uc --output {results_folder_name}/vsearch/merged.derep.fasta'
     #subprocess.call(args_3, shell = True)
     #add_to_log(results_folder_name, args_3)
-    
+
     args_4 = f'vsearch --cluster_size {results_folder_name}/vsearch/drep_data/all_derep.fasta --threads {str(threads)} --id {str(perc_identity)} --strand both --sizein --sizeout --fasta_width 0 --uc {results_folder_name}/vsearch/otu_clusters.uc --centroids {results_folder_name}/vsearch/otu_centroids.fasta  --otutabout {results_folder_name}/vsearch/otu_table.tsv'
     subprocess.call(args_4, shell = True)
     add_to_log(results_folder_name, args_4)
@@ -184,13 +184,13 @@ def run_vsearch(results_folder_name, samples, threads, perc_identity):
 # taxonomy part
 def taxonomy_qiime2(results_folder_name, classifier_path, threads):
     os.makedirs(f'{results_folder_name}/qiime2')
-    
+
     args_1 = f"qiime tools import –-input-path {results_folder_name}/vsearch/merged.derep.fasta –-output-path {results_folder_name}/qiime2/sequences.qza –-type 'FeatureData[Sequence]'"
     subprocess.call(args_1, shell = True)
     add_to_log(results_folder_name, args_1)
 
     if ',' in classifier_path:
-        classifiers = ','.split(classifier_path)
+        classifiers = classifier_path.split(',')
         for classifier in classifiers:
             classifier_name = classifier.split('/')[-1].replace('.qza','')
             args_2 = f'qiime feature-classifier classify-sklearn --p-n-jobs {threads} --i-reads {results_folder_name}/qiime2/sequences.qza --i-classifier {classifier} --o-classification {results_folder_name}/qiime2/taxonomy-classification-{classifier_name}.qza'
@@ -198,6 +198,8 @@ def taxonomy_qiime2(results_folder_name, classifier_path, threads):
             add_to_log(results_folder_name, args_2)
 
             args_3 = f'qiime tools export --input-path {results_folder_name}/qiime2/taxonomy-classification-{classifier_name}.qza --output-path {results_folder_name}/exports/taxonomy-classification-{classifier_name}'
+            subprocess.call(args_3, shell = True)
+            add_to_log(results_folder_name, args_3)
     else:
         args_2 = f'qiime feature-classifier classify-sklearn --p-n-jobs {threads} --i-reads {results_folder_name}/qiime2/sequences.qza --i-classifier {classifier_path} --o-classification {results_folder_name}/qiime2/taxonomy-classification.qza'
         subprocess.call(args_2, shell = True)
@@ -238,7 +240,7 @@ def main():
     # Parse arguments
     args = parser.parse_args()
     out_folder = f'{args.name}_results'
-    
+
     if args.skippreprocessing is False:
         # Create results folder, print the environment summary, load the metadata
         # and list the samples to process
@@ -264,8 +266,8 @@ def main():
         # Create the Qiime manifest, run qiime analysis
         run_vsearch(out_folder, samples_names, args.threads, args.perc_identity/100)
         #import_qiime2(out_folder)
-        #taxonomy_qiime2(out_folder, args.classifier, args.threads)
-        
-        
+        taxonomy_qiime2(out_folder, args.classifier, args.threads)
+
+
 if __name__ == "__main__":
     main()
