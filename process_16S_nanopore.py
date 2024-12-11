@@ -268,6 +268,5 @@ def main():
         #import_qiime2(out_folder)
         taxonomy_qiime2(out_folder, args.classifier, args.threads)
 
-
 if __name__ == "__main__":
     main()
