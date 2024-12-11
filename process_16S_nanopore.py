@@ -101,7 +101,7 @@ def check_metadata_samples(metadata, samples, results_folder_name):
     out_list = [sample for sample in list(metadata_samples) if sample in files_samples]
     return metadata.loc[metadata['Barcode'].isin(out_list)], out_list
 
-ef concatenate_files(folder_path, metadata, samples, results_folder_name):
+def concatenate_files(folder_path, metadata, samples, results_folder_name):
     """
     Takes folder paths, metadata files and samples list and concatenate the data
     for each sample in the list, + renames it to the sample name using metadata.
