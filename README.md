@@ -30,7 +30,7 @@ gzip *.fastq
   
   example run: `python3 process_16S_nanopore.py -f /data/16s/alpine_soil/ -n /data/16s/processed_data/alpine_soil -m /data/16s/alpine_soil/metadata.tsv -c classifier1,classifier2 -t 24`, -f is the data folder (reads), -n is the name for the output, metadata.tsv is the metadata file (look at the one in the repo for guidance, needs the Barcode and #SampleID columns), -t is the numbers of threads to use. Run it from wherever you want, but be sure to use absolute paths for both the reads data directory, and the output directory name!
 
-  f. Now the taxonomy will be in the exports/ folder, and the OTU table will be in the vsearch/ folder as "otu_table.tsv". Use the "aggregate_taxonomy.py" script as follows to get OTU-level taxonomy classification: `python3 aggregate_taxonomy.py -f RESULTS_FOLDER -t TAXONOMY_FILE.tsv`
+  f. Now the taxonomy will be in the exports/ folder, and the OTU table will be in the vsearch/ folder as "otu_table.tsv". Use the "aggregate_taxonomy.py" script as follows to get OTU-level taxonomy classification: `python3 aggregate_taxonomy.py -f RESULTS_FOLDER/ -t TAXONOMY_FILE.tsv`
 
 # 2. Description
 
