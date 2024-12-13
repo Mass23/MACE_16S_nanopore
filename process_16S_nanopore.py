@@ -185,7 +185,7 @@ def run_vsearch(results_folder_name, samples, threads, perc_identity):
 def taxonomy_qiime2(results_folder_name, classifier_path, threads):
     os.makedirs(f'{results_folder_name}/qiime2')
 
-    args_1 = f"qiime tools import --input-path {results_folder_name}/vsearch/merged.derep.fasta --output-path {results_folder_name}/qiime2/sequences.qza --type 'FeatureData[Sequence]'"
+    args_1 = f"qiime tools import --input-path {results_folder_name}/vsearch/drep_data/all_derep.fasta --output-path {results_folder_name}/qiime2/sequences.qza --type 'FeatureData[Sequence]'"
     subprocess.call(args_1, shell = True)
     add_to_log(results_folder_name, args_1)
 
