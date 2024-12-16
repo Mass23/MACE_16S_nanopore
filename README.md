@@ -4,7 +4,7 @@
 
 # 1. Installation & Usage
 
-  a. Clone the Github repo `git clone https://github.com/Mass23/MACE_16S_nanopore`
+  a. Go to the Github repo on the server and copy the latest version on the script in your home `/data/16s/MACE_16S_nanopore`
 
   b. Install the "MACE_16S_nanopore.yml" conda environments:
 ```
