@@ -32,6 +32,12 @@ gzip *.fastq
 
   f. Now the taxonomy will be in the exports/ folder, and the OTU table will be in the vsearch/ folder as "otu_table.tsv" (!important file!). Use the "aggregate_taxonomy.py" script as follows to get OTU-level taxonomy classification: `python3 aggregate_taxonomy.py -f RESULTS_FOLDER/ -t TAXONOMY_FILE.tsv` This will create an aggregated taxonomy file in the exports folder that you can use for downstream analysis (!important file!).
 
+
+If you want to process several datasets together, you should do the following:
+- 1. Run each plate separately running the --skipqiime2 flag, this will create the raw_data/ folder containing the _chopped.fastq.gz.
+- 2. Create a "merged" folder directory, it should end with _results to be treated as an output from this pipeline.
+- 3. Run the script using the --skippreprocessing flag, the folder and metadata arguments do not matter but keep them so the script runs, just use the proper output folder in the -n argument (your mergred directory without the _results at the end).
+
 # 2. Description
 
   a. Porechop: removes adapters
