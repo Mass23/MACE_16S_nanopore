@@ -22,7 +22,7 @@ conda env create --name MACE_16S_nanopore --file=env/MACE_16S_nanopore.yml
 
   d. You will then maybe need to remove the "kit name" suffix, and gzip these files (from within the fastq files directory)
 ```
-rename s/SUFFIX_// S*.fastq
+rename s/SUFFIX_// S*.fastq # or rename 's/[a-f0-9]+_(SQK-NBD114-96_)?//' *.fastq if there is something before that suffix
 gzip *.fastq
 ```
     
